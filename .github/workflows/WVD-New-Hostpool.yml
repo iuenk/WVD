@@ -84,7 +84,7 @@ jobs:
           $jsonARMTemplateFile = [string]($env:TEMP + "\ARM-WVDCreateHostpool.json")
           
           # Storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/ARM-WVDCreateHostpool.json?token=AS7UCBWYKDFVTOXGOCTV6M3AHAKVG"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/ARM-WVDCreateHostpool.json"
           
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
