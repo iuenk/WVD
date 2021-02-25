@@ -20,6 +20,7 @@ Else{
 
 New-AzKeyVault -Name "Ucorp-WVD-KV" -ResourceGroupName $ResourceGroupName -Location "westeurope"
 Set-AzKeyVaultAccessPolicy -VaultName "Ucorp-WVD-KV" -UserPrincipalName "iuenk-a@ucorp.nl" -PermissionsToSecrets get,set,delete,list
+Set-AzKeyVaultAccessPolicy -VaultName "Ucorp-WVD-KV" -ObjectId "f7f33d28-5b73-43c3-a7b5-655a7c307221" -PermissionsToSecrets get,set,delete,list
 
 Set-AzKeyVaultSecret -VaultName "Ucorp-WVD-KV" -Name "domainadminuser" -SecretValue $domainadminuser
 Set-AzKeyVaultSecret -VaultName "Ucorp-WVD-KV" -Name "domainadminpassword" -SecretValue $domainadminpassword
