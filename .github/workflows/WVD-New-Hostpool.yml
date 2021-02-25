@@ -2,9 +2,9 @@ name: WVD - New Hostpool with SIG image
 on: workflow_dispatch
 
 env:
-  AZURE_HOSTPOOL_NAME: "hp-wvd-gha"              # WVD Hostpool name
+  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"              # WVD Hostpool name
   AZURE_NUMBER_OF_INSTANCES: 1                   # Number of instances to add to the WVD Hostpool
-  SIG_IMAGE_DEF_NAME: win10-evd-20h2
+  SIG_IMAGE_DEF_NAME: Ucorp-WVD-Image
 
 jobs:
   build:
@@ -28,17 +28,17 @@ jobs:
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
           
           # Retrieve sensitive information from KeyVault
-          $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainadminpassword).SecretValue
-          $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainadminuser).SecretValue
-          $secureDomainName = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainname).SecretValue
-          $secureOuPath = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainoupath).SecretValue
+          $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminpassword).SecretValue
+          $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminuser).SecretValue
+          $secureDomainName = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainname).SecretValue
+          $secureOuPath = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainoupath).SecretValue
           
           # Convert KeyVault SecureString to Plaintext
           $domainAdminUser = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainAdminUser)))
           $domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
           $ouPath = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureOuPath)))
 
-          $postFix = "wvd-gha"
+          $postFix = "wvd-ucorp"
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
@@ -49,26 +49,26 @@ jobs:
             "addToWorkspace" = $true;
             "workSpaceName" = "ws-$($postFix)";
             "workspaceLocation" = "westeurope";
-            "workspaceResourceGroup" = "rg-wvd-infra";
+            "workspaceResourceGroup" = "Ucorp-WVD-RG";
             "allApplicationGroupReferences" = "";
             "createAvailabilitySet" = $true;
-            "vmResourceGroup" = "rg-wvd-resources";
+            "vmResourceGroup" = "Ucorp-WVD-RG";
             "vmLocation" = "westeurope";
-            "vmSize" = "Standard_D2s_v3";
+            "vmSize" = "Standard_D4s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
             "vmNamePrefix" = "sh-$($postFix)";
             "vmImageType" = "CustomImage";
-            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/rg-wvd-images/providers/Microsoft.Compute/galleries/sigWVDImages/images/${{env.SIG_IMAGE_DEF_NAME}}";
+            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
             "vmDiskType" = "StandardSSD_LRS";
             "vmUseManagedDisks" = $true;
-            "existingVnetName" = "vnet-wvd-resources";
-            "existingSubnetName" = "default";
-            "virtualNetworkResourceGroupName" = "rg-wvd-resources";
+            "existingVnetName" = "Ucorp-vNet";
+            "existingSubnetName" = "Ucorp-WVD-Subnet";
+            "virtualNetworkResourceGroupName" = "Ucorp-Network-RG";
             "usePublicIP" = $false;
             "createNetworkSecurityGroup" = $false;
             "hostpoolType" = "Pooled";
-            "maxSessionLimit" = 25;
-            "loadBalancerType" = "BreadthFirst";
+            "maxSessionLimit" = 6;
+            "loadBalancerType" = "DepthFirst";
             "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/rg-wvd-images/providers/Microsoft.Compute/galleries/sigWVDImages/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"sh-$($postFix)`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard_D2s_v3`",`"cores`"`:2,`"ram`"`:8},`"galleryItemId`"`:null}";
             "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
             "apiVersion" = "2019-12-10-preview";
@@ -81,10 +81,10 @@ jobs:
           #$objTemplateParameter
           
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\WVDAT-NewHostpool.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\ARM-WVDCreateHostpool.json")
           
           # Storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/cognitionIT/AzureWVD/master/ARMTemplates/ARM-T-WVDCreateHostpool.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/ARM-WVDCreateHostpool.json"
           
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
