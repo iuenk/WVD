@@ -75,9 +75,9 @@ If (Invoke-NETFrameworkCheck)
         $objTemplateParameter = @{
             "hostpoolName" = "hp-$($postFix)";
             "hostpoolDescription" = "Created by PowerShell and ARM Template";
-            "location" = "eastus";
+            "location" = "westeurope";
             "workSpaceName" = "ws-$($postFix)";
-            "workspaceLocation" = "eastus";
+            "workspaceLocation" = "westeurope";
             "workspaceResourceGroup" = "rg-wvd-infra";
             "allApplicationGroupReferences" = "/subscriptions/$($azSubscriptions.Id)/resourcegroups/rg-wvd-infra/providers/Microsoft.DesktopVirtualization/applicationgroups/hp-$($postFix)-DAG";
             "addToWorkspace" = $true;
