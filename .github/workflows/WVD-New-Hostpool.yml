@@ -2,9 +2,10 @@ name: WVD - New Hostpool with SIG image
 on: workflow_dispatch
 
 env:
-  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"              # WVD Hostpool name
-  AZURE_NUMBER_OF_INSTANCES: 1                   # Number of instances to add to the WVD Hostpool
-  SIG_IMAGE_DEF_NAME: Ucorp-WVD-Image
+  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"       # WVD Hostpool name
+  AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
+  SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
+  CUSTOMER_PREFIX: "Ucorp-WVD"
 
 jobs:
   build:
@@ -25,6 +26,7 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
+          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
           
           # Retrieve sensitive information from KeyVault
@@ -42,27 +44,27 @@ jobs:
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
-            "hostpoolName" = "hp-$($postFix)";
+            "hostpoolName" = $HostPoolName;
             "hostpoolDescription" = "Created by GitHub Actions, PowerShell and ARM Template";
             "location" = "westeurope";
             "validationEnvironment" = $false;
             "addToWorkspace" = $true;
-            "workSpaceName" = "ws-$($postFix)";
+            "workSpaceName" = "$($CustomerPrefix)-Workspace";
             "workspaceLocation" = "westeurope";
-            "workspaceResourceGroup" = "Ucorp-Infra-RG";
+            "workspaceResourceGroup" = "$($CustomerPrefix)-RG";
             "allApplicationGroupReferences" = "";
             "createAvailabilitySet" = $true;
-            "vmResourceGroup" = "Ucorp-WVD-RG";
+            "vmResourceGroup" = "$($CustomerPrefix)-RG";
             "vmLocation" = "westeurope";
             "vmSize" = "Standard_D4s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
-            "vmNamePrefix" = "sh-$($postFix)";
+            "vmNamePrefix" = $CustomerPrefix";
             "vmImageType" = "CustomImage";
             "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
             "vmDiskType" = "StandardSSD_LRS";
             "vmUseManagedDisks" = $true;
             "existingVnetName" = "Ucorp-vNet";
-            "existingSubnetName" = "Ucorp-WVD-Subnet";
+            "existingSubnetName" = "$($CustomerPrefix)-Subnet";
             "virtualNetworkResourceGroupName" = "Ucorp-Network-RG";
             "usePublicIP" = $false;
             "createNetworkSecurityGroup" = $false;
@@ -91,5 +93,5 @@ jobs:
           
           # ARM Template file
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
-          New-AzResourceGroupDeployment -ResourceGroupName "Ucorp-Infra-RG" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword #-Verbose
+          New-AzResourceGroupDeployment -ResourceGroupName "$($CustomerPrefix)-RG" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword #-Verbose
         azPSVersion: 'latest'
