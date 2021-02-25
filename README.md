@@ -5,3 +5,4 @@ This repository contains a collection of scripts, templates and other resources 
 As different techniques are used, the resources are stored in different sections, like the REST API specific resources or the PowerShell Az Module specific scripts.
 
 ok test
+asdasdasd
