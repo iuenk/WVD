@@ -44,11 +44,11 @@ jobs:
           $objTemplateParameter = @{
             "hostpoolName" = "hp-$($postFix)";
             "hostpoolDescription" = "Created by GitHub Actions, PowerShell and ARM Template";
-            "location" = "eastus";
+            "location" = "westeurope";
             "validationEnvironment" = $false;
             "addToWorkspace" = $true;
             "workSpaceName" = "ws-$($postFix)";
-            "workspaceLocation" = "eastus";
+            "workspaceLocation" = "westeurope";
             "workspaceResourceGroup" = "rg-wvd-infra";
             "allApplicationGroupReferences" = "";
             "createAvailabilitySet" = $true;
