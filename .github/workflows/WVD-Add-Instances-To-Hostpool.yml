@@ -4,6 +4,8 @@ on: workflow_dispatch
 env:
   AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"              # set this to the WVD Hostpool name to add the instances
   AZURE_NUMBER_OF_INSTANCES: 1                   # set this to the number of instances to add to the WVD Hostpool
+  SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
+  
 
 jobs:
   build:
