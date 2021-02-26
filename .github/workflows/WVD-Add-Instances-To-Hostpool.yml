@@ -51,12 +51,12 @@ jobs:
               Break
             }
             $sessionHost = $sessionHosts[0]
-            
+
             # Retrieve sensitive information from KeyVault
-            $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainadminpassword).SecretValue
-            $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainadminuser).SecretValue
-            $secureDomainName = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainname).SecretValue
-            $secureOuPath = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainoupath).SecretValue
+            $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminpassword).SecretValue
+            $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminuser).SecretValue
+            $secureDomainName = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainname).SecretValue
+            $secureOuPath = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainoupath).SecretValue
             
             # Convert KeyVault SecureString to Plaintext
             $domainAdminUser = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainAdminUser)))
