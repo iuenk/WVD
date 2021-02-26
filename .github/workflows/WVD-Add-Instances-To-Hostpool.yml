@@ -52,6 +52,8 @@ jobs:
             }
             $sessionHost = $sessionHosts[0]
 
+            $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
+
             # Retrieve sensitive information from KeyVault
             $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminpassword).SecretValue
             $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminuser).SecretValue
@@ -125,7 +127,7 @@ jobs:
             If ($vmTemplate.imageType -eq "CustomImage")
             {
                 # Add the Gallery image information
-                $objTemplateParameter.Add("vmCustomImageSourceId",$($vmTemplate.customImageId))
+                $objTemplateParameter.Add("vmCustomImageSourceId",$($vmCustomImageSourceId))
             }
 
             ## Show objTemplateParameter
