@@ -4,7 +4,7 @@ $SubscriptionId = "438eedbe-4df3-42b6-9bd2-5b7f8a069f4b"
 $ResourceGroupName = "Ucorp-Vault-RG"
 
 $domainadminuser = ConvertTo-SecureString "iuenk-a@ucorp.nl" -AsPlainText -Force
-$domainadminpassword = ConvertTo-SecureString "ZwemmenZwemmen1!" -AsPlainText -Force
+$domainadminpassword = ConvertTo-SecureString "<wachtwoord>" -AsPlainText -Force
 $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
 $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force
 
