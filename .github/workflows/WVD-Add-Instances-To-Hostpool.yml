@@ -2,7 +2,7 @@ name: WVD - Add instances to Hostpool
 on: workflow_dispatch
 
 env:
-  AZURE_HOSTPOOL_NAME: "hp-wvd-gha"              # set this to the WVD Hostpool name to add the instances
+  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"              # set this to the WVD Hostpool name to add the instances
   AZURE_NUMBER_OF_INSTANCES: 1                   # set this to the number of instances to add to the WVD Hostpool
 
 jobs:
@@ -135,7 +135,7 @@ jobs:
             $jsonARMTemplateFile = [string]($env:TEMP + "\WVDAT-AddToHostpool.json")
             
             # Storage location for custom ARM template
-            $templateUrl="https://raw.githubusercontent.com/cognitionIT/AzureWVD/master/ARMTemplates/ARM-T-WVDAddSessionHostToHostpool.json"
+            $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/ARM-WVDAddSessionHostToHostpool.json"
             
             # Retrieve the template file and save it in a temp file location
             Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
