@@ -112,6 +112,7 @@ jobs:
               "virtualNetworkResourceGroupName" = $($vnetrgInfo);
               "usePublicIP" = $false;
               "createNetworkSecurityGroup" = $false;
+              "virtualMachineTags" = @{"Environment"="Production"; "Maintenance"="Thursday"}
               "apiVersion" = "2019-12-10-preview";
               "administratorAccountUsername" = "$($domainAdminUser)";
               "domain"="$($domainName)";
