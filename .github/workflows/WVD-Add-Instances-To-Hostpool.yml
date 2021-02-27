@@ -55,6 +55,7 @@ jobs:
             $sessionHost = $sessionHosts[0]
 
             $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
+            "vmSize" = "Standard_D4s_v3";
 
             # Retrieve sensitive information from KeyVault
             $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName Ucorp-WVD-KV -Name domainadminpassword).SecretValue
@@ -100,7 +101,7 @@ jobs:
               "vmInitialNumber" = $($sessionHosts.Count);
               "vmResourceGroup" = $($sessionHostRG);
               "vmLocation" = $($sessionHostLocation);
-              "vmSize" = $($vmTemplate.vmSize.id);
+              #"vmSize" = $($vmTemplate.vmSize.id);
               "vmNumberOfInstances" = $NumberOfInstances;
               "vmNamePrefix" = $($vmTemplate.namePrefix);
               "vmImageType" = $($vmTemplate.imageType);
