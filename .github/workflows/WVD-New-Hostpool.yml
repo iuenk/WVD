@@ -6,6 +6,8 @@ env:
   AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
   CUSTOMER_PREFIX: "Ucorp-WVD"
+  TAGS: @{"Environment"="Production"}
+  
 
 jobs:
   build:
@@ -26,6 +28,7 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
+          [string]$Tags = [System.Environment]::GetEnvironmentVariable('TAGS')
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
           

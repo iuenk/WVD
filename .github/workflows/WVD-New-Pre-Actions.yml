@@ -1,0 +1,63 @@
+name: WVD - Pre - Actions
+on: workflow_dispatch
+
+env:
+  CUSTOMER_PREFIX: "Ucorp"
+  TAGS: @{"Environment"="Production"}
+
+jobs:
+  build:
+    name: ARM - Create Resource Groups
+    runs-on: windows-latest
+    steps:
+    # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
+    
+    # Azure PowerShell: Run inline script    
+    - name: Run Azure PowerShell script (inline)
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          # Read the environment variables in PowerShell
+          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$Tags = [System.Environment]::GetEnvironmentVariable('TAGS')
+
+          $ResourceGroupNameWVD = "$CustomerPrefix-WVD-RG"
+          $ResourceGroupNameStorage = "$CustomerPrefix-Storage-RG"
+          $ResourceGroupNameAutomation = "$CustomerPrefix-Automation-RG"
+          $ResourceGroupNameVault = "$CustomerPrefix-Vault-RG"
+
+          ## Create resourcegroup WVD
+          $RGCheckWVD = Get-AzResourceGroup | ?{$_.ResourceGroupName -eq $ResourceGroupNameWVD}
+          if($RGCheckWVD -eq $null){New-AzResourceGroup -name $ResourceGroupNameWVD -Location "westeurope" -Tags $Tags}
+
+          ## Create resourcegroup Storage
+          $RGCheckStorage = Get-AzResourceGroup | ?{$_.ResourceGroupName -eq $ResourceGroupNameStorage}
+          if($RGCheckStorage -eq $null){New-AzResourceGroup -name $ResourceGroupNameStorage -Location "westeurope" -Tags $Tags}
+
+          ## Start configuring Key Vault
+          $domainadminuser = ConvertTo-SecureString ${{secrets.AZURE_USERNAME}} -AsPlainText -Force
+          $domainadminpassword = ConvertTo-SecureString ${{secrets.AZURE_PASSWORD}} -AsPlainText -Force
+          $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
+          $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force
+
+          # Create resourcegroup Vault
+          $RGCheckVault = Get-AzResourceGroup | ?{$_.ResourceGroupName -eq $ResourceGroupNameVault}
+          if($RGCheckVault -eq $null){New-AzResourceGroup -name $ResourceGroupNameVault -Location "westeurope"}
+
+          # Create new Key Vault
+          $KeyVaultCheck = Get-AzKeyVault | ?{$_.VaultName -eq "$CustomerPrefix-WVD-KV"}
+          if($KeyVaultCheck -eq $null){
+          New-AzKeyVault -Name "$CustomerPrefix-WVD-KV" -ResourceGroupName $ResourceGroupNameVault -Location "westeurope"
+          Set-AzKeyVaultAccessPolicy -VaultName "$CustomerPrefix-WVD-KV" -ObjectId "f7f33d28-5b73-43c3-a7b5-655a7c307221" -PermissionsToSecrets get,set,delete,list
+          Set-AzKeyVaultSecret -VaultName "Ucorp-WVD-KV" -Name "domainadminuser" -SecretValue $domainadminuser
+          Set-AzKeyVaultSecret -VaultName "Ucorp-WVD-KV" -Name "domainadminpassword" -SecretValue $domainadminpassword
+          Set-AzKeyVaultSecret -VaultName "Ucorp-WVD-KV" -Name "domainname" -SecretValue $domainname
+          Set-AzKeyVaultSecret -VaultName "Ucorp-WVD-KV" -Name "domainoupath" -SecretValue $domainoupath
+          }
+
+        azPSVersion: 'latest'

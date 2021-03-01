@@ -5,7 +5,7 @@ env:
   AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"              # set this to the WVD Hostpool name to add the instances
   AZURE_NUMBER_OF_INSTANCES: 1                   # set this to the number of instances to add to the WVD Hostpool
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
-  
+  TAGS: @{"Environment"="WVD Production"; "Maintenance"="Thursday"}
 
 jobs:
   build:
@@ -26,6 +26,7 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
+          [string]$Tags = [System.Environment]::GetEnvironmentVariable('TAGS')
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
           
           # Retrieve the given Host Pool information
@@ -113,7 +114,7 @@ jobs:
               "virtualNetworkResourceGroupName" = $($vnetrgInfo);
               "usePublicIP" = $false;
               "createNetworkSecurityGroup" = $false;
-              "virtualMachineTags" = @{"Environment"="Production"; "Maintenance"="Thursday"}
+              "virtualMachineTags" = $Tags;
               "apiVersion" = "2019-12-10-preview";
               "administratorAccountUsername" = "$($domainAdminUser)";
               "domain"="$($domainName)";
