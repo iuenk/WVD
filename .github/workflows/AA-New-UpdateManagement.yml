@@ -1,0 +1,90 @@
+name: AA - New - Update Management
+on: workflow_dispatch
+
+env:
+  CUSTOMER_PREFIX: "Ucorp"
+  TAGS: @{"Environment"="WVD Production"}
+
+jobs:
+  build:
+    name:
+    runs-on: windows-latest
+    steps:
+    # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
+    
+    # Azure PowerShell: Run inline script    
+    - name: Run Azure PowerShell script (inline)
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          # Read the environment variables in PowerShell
+          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$Tags = [System.Environment]::GetEnvironmentVariable('TAGS')
+
+          # Create resourcegroup Automation
+          $RGCheckAutomation = Get-AzResourceGroup | ?{$_.ResourceGroupName -eq "$CustomerPrefix-Automation-RG"}
+          if($RGCheckAutomation -eq $null){New-AzResourceGroup -name "$CustomerPrefix-Automation-RG" -Location "westeurope" -Tags $Tags}
+
+          # Create Automation Account
+          New-AzAutomationAccount -Name "$CustomerPrefix-WVD-AA" -Location "westeurope" -ResourceGroupName "$CustomerPrefix-Automation-RG" -Tags $Tags
+
+          # Create Update Management schedule for WVD
+          [datetimeoffset]$StartTime = (Get-Date -Date "04-02-2021 12:00")
+
+          $ScheduleTime = Get-Date $StartTime.LocalDateTime -Format "yyyy-MM-dd"
+          # Create the parameters for setting the schedule
+          $ScheduleParameters = @{
+              ResourceGroupName     = "$CustomerPrefix-Automation-RG"
+              AutomationAccountName = "$CustomerPrefix-WVD-AA"
+              name                  = $ScheduleTime
+              StartTime             = $StartTime
+              OneTime               = $True
+          }
+          # Create the schedule that will be used for the updates
+          $AutomationSchedule = New-AzAutomationSchedule @ScheduleParameters
+
+          # Collect Azure Computers
+          $QueryParameters = @{
+              ResourceGroupName     = (Get-AzResource -Name "LogAnalyticsWorkspace").ResourceGroupName
+              AutomationAccountName = "$CustomerPrefix-WVD-AA"
+              Scope                 = "/subscriptions/$((Get-AzContext).Subscription)"
+              Location              = "westeurope"
+              Tag                   = $Tags
+          }
+          $AzQuery = New-AzAutomationUpdateManagementAzureQuery @QueryParameters 
+
+          # Create update schedule
+          $UpdateParameters = @{
+              ResourceGroupName            = "$CustomerPrefix-Automation-RG"
+              AutomationAccountName        = "$CustomerPrefix-WVD-AA"
+              Schedule                     = $AutomationSchedule
+              Windows                      = $true
+              Duration                     = New-TimeSpan -Hours 2
+              RebootSetting                = "Always"
+              AzureQuery                   = $AzQuery
+              IncludedUpdateClassification = @(
+                  "Unclassified"
+                  "Critical"
+                  "Security"
+                  "UpdateRollup"
+                  "FeaturePack"
+                  "ServicePack"
+                  "Definition"
+                  "Tools"
+                  "Updates"
+              )
+          }
+
+          PreTaskRunbookName = "runbookname"
+          PreTaskRunbookParameter = @{Parameter01 = "parameter"}
+          PostTaskRunbookName = "runbookname"
+          PostTaskRunbookParameter = @{Parameter01 = "parameter"}
+
+          New-AzAutomationSoftwareUpdateConfiguration @UpdateParameters -Verbose -ErrorAction Stop
+
+        azPSVersion: 'latest'

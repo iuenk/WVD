@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 env:
   CUSTOMER_PREFIX: "Ucorp"
-  TAGS: @{"Environment"="Production"}
+  TAGS: @{"Environment"="WVD Production"}
 
 jobs:
   build:
