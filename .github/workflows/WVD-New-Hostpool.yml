@@ -5,7 +5,7 @@ env:
   AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"       # WVD Hostpool name
   AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
-  CUSTOMER_PREFIX: "Ucorp-WVD"
+  CUSTOMER_PREFIX: "Ucorp"
   TAGS: @{"Environment"="Production"}
   
 
@@ -51,23 +51,23 @@ jobs:
             "location" = "westeurope";
             "validationEnvironment" = $false;
             "addToWorkspace" = $true;
-            "workSpaceName" = "$($CustomerPrefix)-Workspace";
+            "workSpaceName" = "$($CustomerPrefix)-WVD-Workspace";
             "workspaceLocation" = "westeurope";
-            "workspaceResourceGroup" = "$($CustomerPrefix)-RG";
+            "workspaceResourceGroup" = "$($CustomerPrefix)-WVD-RG";
             "allApplicationGroupReferences" = "";
             "createAvailabilitySet" = $true;
             "customRdpProperty" = "audiocapturemode:i:1;camerastoredirect:s:*;"
-            "vmResourceGroup" = "$($CustomerPrefix)-RG";
+            "vmResourceGroup" = "$($CustomerPrefix)-WVD-RG";
             "vmLocation" = "westeurope";
             "vmSize" = "Standard_D4s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
-            "vmNamePrefix" = $CustomerPrefix;
+            "vmNamePrefix" = $($CustomerPrefix)-WVD;
             "vmImageType" = "CustomImage";
             "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
             "vmDiskType" = "StandardSSD_LRS";
             "vmUseManagedDisks" = $true;
             "existingVnetName" = "Ucorp-vNet";
-            "existingSubnetName" = "$($CustomerPrefix)-Subnet";
+            "existingSubnetName" = "$($CustomerPrefix)-WVD-Subnet";
             "virtualNetworkResourceGroupName" = "Ucorp-Network-RG";
             "usePublicIP" = $false;
             "createNetworkSecurityGroup" = $false;
@@ -75,7 +75,7 @@ jobs:
             "hostpoolType" = "Pooled";
             "maxSessionLimit" = 8;
             "loadBalancerType" = "DepthFirst";
-            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard D4s v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
+            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-WVD`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard D4s v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
             "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
             "apiVersion" = "2019-12-10-preview";
             "administratorAccountUsername" = "$($domainAdminUser)";
@@ -97,5 +97,5 @@ jobs:
           
           # ARM Template file
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
-          New-AzResourceGroupDeployment -ResourceGroupName "$($CustomerPrefix)-RG" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword #-Verbose
+          New-AzResourceGroupDeployment -ResourceGroupName "$($CustomerPrefix)-WVD-RG" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword #-Verbose
         azPSVersion: 'latest'
