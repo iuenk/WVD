@@ -29,7 +29,7 @@ jobs:
 
           # Create resourcegroup storage
           $rgCheckstorage = Get-AzResourceGroup | Where-Object{$_.ResourceGroupName -eq "$CustomerPrefix-storage-rg"}
-          if($null -eq $rgCheckstorage){New-AzResourceGroup -name "$CustomerPrefix-storage-rg" -Location "westeurope" -Tags $Tags}
+          if($null -eq $rgCheckstorage){New-AzResourceGroup -name "$CustomerPrefix-storage-rg" -Location "westeurope" -Tag $Tags}
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
