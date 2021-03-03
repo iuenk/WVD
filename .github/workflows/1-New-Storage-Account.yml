@@ -80,5 +80,20 @@ jobs:
           # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
           New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $FslogixID
           New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixID
+          
+          # Create new Key Vault
+          $domainadminuser = ConvertTo-SecureString ${{secrets.AZURE_USERNAME}} -AsPlainText -Force
+          $domainadminpassword = ConvertTo-SecureString ${{secrets.AZURE_PASSWORD}} -AsPlainText -Force
+          $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
+          $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force 
+
+          $spid = Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq "$CustomerPrefix-wvd-sp"} | select -ExpandProperty Id
+
+          New-AzKeyVault -Name "$CustomerPrefix-wvd-kv" -ResourceGroupName "$CustomerPrefix-storage-rg" -Location "westeurope" -Sku "standard" -Tag $Tags
+          Set-AzKeyVaultAccessPolicy -VaultName "$CustomerPrefix-wvd-kv" -ObjectId $spid -PermissionsToSecrets get,set,delete,list
+          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainadminuser" -SecretValue $domainadminuser
+          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainadminpassword" -SecretValue $domainadminpassword
+          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainname" -SecretValue $domainname
+          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainoupath" -SecretValue $domainoupath
 
         azPSVersion: 'latest'
