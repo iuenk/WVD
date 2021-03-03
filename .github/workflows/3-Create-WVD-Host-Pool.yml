@@ -4,6 +4,7 @@ on: workflow_dispatch
 env:
   AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"       # WVD Hostpool name
   AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
+  SIG: "ucorpwvdsig"                              # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
   CUSTOMER_PREFIX: "Ucorp"
   
@@ -27,6 +28,8 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
+          [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
+          [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
 
@@ -55,7 +58,7 @@ jobs:
             "location" = "westeurope";
             "validationEnvironment" = $false;
             "addToWorkspace" = $true;
-            "workSpaceName" = "$($CustomerPrefix)-WVD-Workspace";
+            "workSpaceName" = "$($CustomerPrefix)-wvd-Workspace";
             "workspaceLocation" = "westeurope";
             "workspaceResourceGroup" = "$($CustomerPrefix)-wvd-rg";
             "allApplicationGroupReferences" = "";
@@ -67,7 +70,7 @@ jobs:
             "vmNumberOfInstances" = $NumberOfInstances;
             "vmNamePrefix" = $($CustomerPrefix)-WVD;
             "vmImageType" = "CustomImage";
-            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
+            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}";
             "vmDiskType" = "StandardSSD_LRS";
             "vmUseManagedDisks" = $true;
             "existingVnetName" = "Ucorp-vNet";
@@ -79,7 +82,7 @@ jobs:
             "hostpoolType" = "Pooled";
             "maxSessionLimit" = 8;
             "loadBalancerType" = "DepthFirst";
-            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-WVD`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard D4s v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
+            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-wvd`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard D4s v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
             "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
             "apiVersion" = "2019-12-10-preview";
             "administratorAccountUsername" = "$($domainAdminUser)";
