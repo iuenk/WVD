@@ -1,14 +1,12 @@
-name: WVD - New Storage Account
+name: New-StorageAccount
 on: workflow_dispatch
 
 env:
-  AZURE_HOSTPOOL_NAME: "hp-wvd-gha"              # WVD Hostpool name
-  AZURE_NUMBER_OF_INSTANCES: 1                   # Number of instances to add to the WVD Hostpool
-  SIG_IMAGE_DEF_NAME: win10-evd-20h2
+  CUSTOMER_PREFIX: "Ucorp"
 
 jobs:
   build:
-    name: ARM - Create Storage Account
+    name: New-StorageAccount
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
@@ -17,20 +15,69 @@ jobs:
       with:
         creds: ${{secrets.AZURE_CREDENTIALS}}
         enable-AzPSSession: true 
-
-# Azure PowerShell: Run inline script    
+    
+    # Azure PowerShell: Run inline script    
     - name: Run Azure PowerShell script (inline)
       uses: azure/powershell@v1
       with:
         inlineScript: |
+          # Read the environment variables in PowerShell
+          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
 
-          # Retrieve sensitive information from KeyVault
-          $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainadminpassword).SecretValue
-          $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainadminuser).SecretValue
-          $secureDomainName = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainname).SecretValue
-          $secureOuPath = (Get-AzKeyVaultSecret -VaultName kv-infrasecrets -Name domainoupath).SecretValue
+          $Tags = @{"Environment"="WVD Production"}
+          $SecurityGroup = "SG_WVD_Users"
+
+          # Create resourcegroup Storage
+          $RGCheckStorage = Get-AzResourceGroup | Where-Object{$_.ResourceGroupName -eq "$CustomerPrefix-Storage-RG"}
+          if($null -eq $RGCheckStorage){New-AzResourceGroup -name "$CustomerPrefix-Storage-RG" -Location "westeurope" -Tags $Tags}
+
+          ## Create a Template Parameter Object (hashtable)
+          $objTemplateParameter = @{
+          "storageAccountName" = ($CustomerPrefix + 'wvdstorage');
+          "location" = "westeurope";
+          "accessTier" = "Hot";
+          "minimumTlsVersion" = "TLS1_2";
+          "supportsHttpsTrafficOnly" = $true;
+          "allowBlobPublicAccess" = $false;
+          "allowSharedKeyAccess" = $true;
+          "networkAclsBypass" = "AzureServices";
+          "networkAclsDefaultAction" = "Allow";
+          "accountType" = "Standard_ZRS";
+          "kind" = "StorageV2";
+          "isShareSoftDeleteEnabled" = $true;
+          "shareSoftDeleteRetentionDays" = "90";
+          }
           
-          # Convert KeyVault SecureString to Plaintext
-          $domainAdminUser = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainAdminUser)))
-          $domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
-          $ouPath = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureOuPath)))
+          # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
+          $jsonARMTemplateFile = [string]($env:TEMP + "\ARM-CreateStorageAccount.json")
+              
+          # Storage location for custom ARM template
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/ARM-CreateStorageAccount.json"
+          
+          # Retrieve the template file and save it in a temp file location
+          Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
+          
+          # ARM Template file
+          ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
+          New-AzResourceGroupDeployment -ResourceGroupName "$CustomerPrefix-Storage-RG" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
+
+          # Create file shares fslogix and msixappattach
+          $storageAccountName = ($CustomerPrefix + 'wvdstorage')
+          $storageKey = (Get-AzStorageAccountKey -ResourceGroupName "$CustomerPrefix-Storage-RG" -Name $storageAccountName).Value[0]
+
+          $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageKey
+
+          $fslogix = "fslogixprofiles"
+          $msix = "msixappattach"
+          New-AzStorageShare -Name $fslogix -Context $storageContext
+          New-AzStorageShare -Name $msix -Context $storageContext
+ 
+          #rechten nog zetten op de shares
+          $SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
+          $FslogixID = (Get-AzStorageShare -Name $fslogix -Context $storageContext).id
+          $MsixID = (Get-AzStorageShare -Name $msix -Context $storageContext).id
+
+          New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "Storage File Data SMB Share Contributor" -Scope $FslogixID
+          New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "Storage File Data SMB Share Contributor" -Scope $MsixID
+
+        azPSVersion: 'latest'
