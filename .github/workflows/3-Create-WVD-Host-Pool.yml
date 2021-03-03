@@ -1,0 +1,103 @@
+name: 3-Create-WVD-Host-Pool
+on: workflow_dispatch
+
+env:
+  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Hostpool"       # WVD Hostpool name
+  AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
+  SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
+  CUSTOMER_PREFIX: "Ucorp"
+  
+
+jobs:
+  build:
+    name: 3-Create-WVD-Host-Pool
+    runs-on: windows-latest
+    steps:
+    # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
+    
+    # Azure PowerShell: Run inline script    
+    - name: Run Azure PowerShell script (inline)
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          # Read the environment variables in PowerShell
+          [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
+          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
+
+          $Tags = @{"Environment"="WVD Production"}
+          $VaultName = "$CustomerPrefix-wvd-kv"
+
+          # Retrieve sensitive information from KeyVault
+          $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminpassword).SecretValue
+          $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminuser).SecretValue
+          $secureDomainName = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainname).SecretValue
+          $secureOuPath = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainoupath).SecretValue
+
+          # Convert KeyVault SecureString to Plaintext
+          $domainAdminUser = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainAdminUser)))
+          $domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
+          $ouPath = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureOuPath)))
+
+          # Create resourcegroup WVD
+          $RGCheckWVD = Get-AzResourceGroup | Where-Object{$_.ResourceGroupName -eq "$CustomerPrefix-wvd-rg"}
+          if($null -eq $RGCheckWVD){New-AzResourceGroup -name "$CustomerPrefix-wvd-rg" -Location "westeurope" -Tag $Tags}
+
+          ## Create a Template Parameter Object (hashtable)
+          $objTemplateParameter = @{
+            "hostpoolName" = $HostPoolName;
+            "hostpoolDescription" = "Created by GitHub Actions, PowerShell and ARM Template";
+            "location" = "westeurope";
+            "validationEnvironment" = $false;
+            "addToWorkspace" = $true;
+            "workSpaceName" = "$($CustomerPrefix)-WVD-Workspace";
+            "workspaceLocation" = "westeurope";
+            "workspaceResourceGroup" = "$($CustomerPrefix)-wvd-rg";
+            "allApplicationGroupReferences" = "";
+            "createAvailabilitySet" = $true;
+            "customRdpProperty" = "audiocapturemode:i:1;camerastoredirect:s:*;"
+            "vmResourceGroup" = "$($CustomerPrefix)-wvd-rg";
+            "vmLocation" = "westeurope";
+            "vmSize" = "Standard_D4s_v3";
+            "vmNumberOfInstances" = $NumberOfInstances;
+            "vmNamePrefix" = $($CustomerPrefix)-WVD;
+            "vmImageType" = "CustomImage";
+            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}";
+            "vmDiskType" = "StandardSSD_LRS";
+            "vmUseManagedDisks" = $true;
+            "existingVnetName" = "Ucorp-vNet";
+            "existingSubnetName" = "$($CustomerPrefix)-wvd-subnet";
+            "virtualNetworkResourceGroupName" = "$($CustomerPrefix)-network-rg";
+            "usePublicIP" = $false;
+            "createNetworkSecurityGroup" = $false;
+            "virtualMachineTags" = $Tags;
+            "hostpoolType" = "Pooled";
+            "maxSessionLimit" = 8;
+            "loadBalancerType" = "DepthFirst";
+            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/ucorpwvdsig/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-WVD`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard D4s v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
+            "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
+            "apiVersion" = "2019-12-10-preview";
+            "administratorAccountUsername" = "$($domainAdminUser)";
+            "domain"="$($domainName)";
+            "ouPath"="$($ouPath)";
+          }
+
+          # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
+          $jsonARMTemplateFile = [string]($env:TEMP + "\3-ARM-Create-WVD-Hostpool.json")
+
+          # Storage location for custom ARM template
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/3-ARM-Create-WVD-Hostpool.json"
+
+          # Retrieve the template file and save it in a temp file location
+          Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
+
+          # ARM Template file
+          ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
+          New-AzResourceGroupDeployment -ResourceGroupName "$($CustomerPrefix)-wvd-rg" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Tag $Tags -Verbose
+        
+        azPSVersion: 'latest'
