@@ -1,0 +1,54 @@
+name: 2-ARM-Create-Log-Analytics-Workspace
+on: workflow_dispatch
+
+env:
+  CUSTOMER_PREFIX: "ucorp"
+
+jobs:
+  build:
+    name: 2-ARM-Create-Log-Analytics-Workspace
+    runs-on: windows-latest
+    steps:
+    # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
+    
+    # Azure PowerShell: Run inline script    
+    - name: Run Azure PowerShell script (inline)
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          # Read the environment variables in PowerShell
+          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+
+          $Tags = @{"Environment"="WVD Production"}
+
+          $ResourceGroup = "$CustomerPrefix-storage-rg"
+          $WorkspaceName = "$CustomerPrefix-wvd-law"
+          $Location = "westeurope"
+
+          # Create the resource group if needed
+          try {
+              Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
+          } catch {
+              New-AzResourceGroup -Name $ResourceGroup -Location $Location
+          }
+          
+          # Create the workspace
+          New-AzOperationalInsightsWorkspace -Location $Location -Name $WorkspaceName -Sku Standard -ResourceGroupName $ResourceGroup
+
+          # List of solutions to enable
+          $Solutions = "Updates", "AntiMalware", "LogManagement", "AzureResources", "LogicAppsManagement", "VMInsights"
+
+          # Add solutions
+          foreach ($solution in $Solutions) {
+              Set-AzOperationalInsightsIntelligencePack -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -IntelligencePackName $solution -Enabled $true
+          }
+
+          # Windows Event
+          New-AzOperationalInsightsWindowsEventDataSource -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -EventLogName "Microsoft-Windows-Windows Defender/Operational" -CollectErrors -CollectWarnings -Name "Windows Defender"
+
+        azPSVersion: 'latest'
