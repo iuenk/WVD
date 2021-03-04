@@ -3,6 +3,8 @@ on: workflow_dispatch
 
 env:
   CUSTOMER_PREFIX: "ucorp"
+  RESOURCE_GROUP: "ucorp-logging-rg"
+  WORKSPACE_NAME: = "ucorp-wvd-law"
 
 jobs:
   build:
@@ -23,22 +25,21 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
+          [string]$WorkspaceName = [System.Environment]::GetEnvironmentVariable('WORKSPACE_NAME')
 
           $Tags = @{"Environment"="WVD Production"}
-
-          $ResourceGroup = "$CustomerPrefix-storage-rg"
-          $WorkspaceName = "$CustomerPrefix-wvd-law"
           $Location = "westeurope"
 
           # Create the resource group if needed
           try {
               Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
           } catch {
-              New-AzResourceGroup -Name $ResourceGroup -Location $Location
+              New-AzResourceGroup -Name $ResourceGroup -Location $Location -Tag $Tags
           }
           
           # Create the workspace
-          New-AzOperationalInsightsWorkspace -Location $Location -Name $WorkspaceName -Sku Standard -ResourceGroupName $ResourceGroup
+          New-AzOperationalInsightsWorkspace -Location $Location -Name $WorkspaceName -Sku Standard -ResourceGroupName $ResourceGroup -Tag $Tags -Verbose
 
           # List of solutions to enable
           $Solutions = "Updates", "AntiMalware", "LogManagement", "AzureResources", "LogicAppsManagement", "VMInsights"

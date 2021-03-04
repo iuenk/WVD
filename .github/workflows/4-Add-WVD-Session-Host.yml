@@ -6,6 +6,8 @@ env:
   AZURE_NUMBER_OF_INSTANCES: 1                   # set this to the number of instances to add to the WVD Hostpool
   SIG: "ucorpwvdsig"                              # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
+  RESOURCE_GROUP: "ucorp-wvd-rg"
+  VAULT_NAME: "ucorp-wvd-kv"
   CUSTOMER_PREFIX: "ucorp"
 
 jobs:
@@ -30,10 +32,11 @@ jobs:
           [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
           [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
+          [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
 
           $Tags = @{"Environment"="WVD Production"}
-          $VaultName = "$CustomerPrefix-wvd-kv"
           
           # Retrieve the given Host Pool information
           try 

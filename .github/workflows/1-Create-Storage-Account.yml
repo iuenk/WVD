@@ -3,6 +3,9 @@ on: workflow_dispatch
 
 env:
   CUSTOMER_PREFIX: "ucorp"
+  STORAGE_ACCOUNT: "ucorpwvdstorage"
+  RESOURCE_GROUP: "ucorp-storage-rg"
+  SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
   build:
@@ -23,17 +26,22 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
+          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
+          [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
 
           $Tags = @{"Environment"="WVD Production"}
-          $SecurityGroup = "SG_WVD_Users"
 
-          # Create resourcegroup storage
-          $rgCheckstorage = Get-AzResourceGroup | Where-Object{$_.ResourceGroupName -eq "$CustomerPrefix-storage-rg"}
-          if($null -eq $rgCheckstorage){New-AzResourceGroup -name "$CustomerPrefix-storage-rg" -Location "westeurope" -Tag $Tags}
+          # Create the resource group if needed
+          try {
+              Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
+              } catch {
+              New-AzResourceGroup -Name $ResourceGroup -Location "westeurope" -Tag $Tags
+              }
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
-          "storageAccountName" = ($CustomerPrefix + 'wvdstorage');
+          "storageAccountName" = "$storageAccountName";
           "location" = "westeurope";
           "accessTier" = "Hot";
           "minimumTlsVersion" = "TLS1_2";
@@ -59,12 +67,10 @@ jobs:
 
           # ARM Template file
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
-          New-AzResourceGroupDeployment -ResourceGroupName "$CustomerPrefix-storage-rg" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
+          New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
           # Create file shares fslogix and msixappattach
-          $storageAccountName = ($CustomerPrefix + 'wvdstorage')
-          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName "$CustomerPrefix-storage-rg" -Name $storageAccountName).Value[0]
-
+          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
           $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
 
           $fslogix = "fslogixprofiles"
@@ -74,26 +80,12 @@ jobs:
 
           #rechten nog zetten op de shares
           $SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
-          $FslogixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-storage-rg/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogix"
-          $MsixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-storage-rg/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$msix"
+          $FslogixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogix"
+          $MsixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$msix"
 
           # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
           New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $FslogixID
           New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixID
-          
-          # Create new Key Vault
-          $domainadminuser = ConvertTo-SecureString ${{secrets.AZURE_USERNAME}} -AsPlainText -Force
-          $domainadminpassword = ConvertTo-SecureString ${{secrets.AZURE_PASSWORD}} -AsPlainText -Force
-          $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
-          $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force 
-
-          $spid = Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq "$CustomerPrefix-wvd-sp"} | select -ExpandProperty Id
-
-          New-AzKeyVault -Name "$CustomerPrefix-wvd-kv" -ResourceGroupName "$CustomerPrefix-storage-rg" -Location "westeurope" -Sku "standard" -Tag $Tags
-          Set-AzKeyVaultAccessPolicy -VaultName "$CustomerPrefix-wvd-kv" -ObjectId $spid -PermissionsToSecrets get,set,delete,list
-          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainadminuser" -SecretValue $domainadminuser
-          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainadminpassword" -SecretValue $domainadminpassword
-          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainname" -SecretValue $domainname
-          Set-AzKeyVaultSecret -VaultName "$CustomerPrefix-wvd-kv" -Name "domainoupath" -SecretValue $domainoupath
 
         azPSVersion: 'latest'
+

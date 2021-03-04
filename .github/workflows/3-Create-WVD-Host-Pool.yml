@@ -6,6 +6,8 @@ env:
   AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
   SIG: "ucorpwvdsig"                              # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
+  RESOURCE_GROUP: "ucorp-wvd-rg"
+  VAULT_NAME: "ucorp-wvd-kv"
   CUSTOMER_PREFIX: "Ucorp"
   
 
@@ -28,21 +30,15 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
-<<<<<<< HEAD:.github/workflows/WVD-New-Hostpool.yml
-=======
           [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
           [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
->>>>>>> d2ce5b4523b76cd827bc5e4704d2a03c1ebb496a:.github/workflows/3-Create-WVD-Host-Pool.yml
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
+          [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
 
           $Tags = @{"Environment"="WVD Production"}
-<<<<<<< HEAD:.github/workflows/WVD-New-Hostpool.yml
-          
-=======
-          $VaultName = "$CustomerPrefix-wvd-kv"
 
->>>>>>> d2ce5b4523b76cd827bc5e4704d2a03c1ebb496a:.github/workflows/3-Create-WVD-Host-Pool.yml
           # Retrieve sensitive information from KeyVault
           $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminpassword).SecretValue
           $secureDomainAdminUser = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminuser).SecretValue
@@ -54,14 +50,12 @@ jobs:
           $domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
           $ouPath = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureOuPath)))
 
-          # Create resourcegroup WVD
-<<<<<<< HEAD:.github/workflows/WVD-New-Hostpool.yml
-          $RGCheckWVD = Get-AzResourceGroup | Where-Object{$_.ResourceGroupName -eq "$CustomerPrefix-WVD-RG"}
-          if($null -eq $RGCheckWVD){New-AzResourceGroup -name "$CustomerPrefix-WVD-RG" -Location "westeurope" -Tags $Tags}
-=======
-          $RGCheckWVD = Get-AzResourceGroup | Where-Object{$_.ResourceGroupName -eq "$CustomerPrefix-wvd-rg"}
-          if($null -eq $RGCheckWVD){New-AzResourceGroup -name "$CustomerPrefix-wvd-rg" -Location "westeurope" -Tag $Tags}
->>>>>>> d2ce5b4523b76cd827bc5e4704d2a03c1ebb496a:.github/workflows/3-Create-WVD-Host-Pool.yml
+          # Create the resource group if needed
+          try {
+              Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
+          } catch {
+              New-AzResourceGroup -Name $ResourceGroup -Location "westeurope" -Tag $Tags
+          }
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
