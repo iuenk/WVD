@@ -1,0 +1,139 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "organization": {
+        "type": "string",
+        "metadata": {
+          "description": "Organization name. For example: AzDays"
+        }
+      },
+      "service-tier": {
+        "type": "string",
+        "defaultValue": "PerNode",
+        "allowedValues": [
+          "Free",
+          "Standalone",
+          "PerNode",
+          "PerGB2018"
+        ],
+        "metadata": {
+          "description": "Service Tier: Free, Standalone, or PerNode"
+        }
+      },
+      "data-retention": {
+        "type": "int",
+        "defaultValue": 365,
+        "minValue": 0,
+        "maxValue": 365,
+        "metadata": {
+          "description": "Number of days data will be retained for."
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "West US 2",
+        "allowedValues": [
+          "australiacentral",
+          "australiaeast",
+          "australiasoutheast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "southafricanorth",
+          "southcentralus",
+          "southeastasia",
+          "uksouth",
+          "ukwest",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ],
+        "metadata": {
+          "description": "Region used when establishing the workspace."
+        }
+      },
+      "tags": {
+        "type": "object",
+        "defaultValue": {
+          "Cost Center": "[resourceGroup().tags['Cost Center']]",
+          "Location": "[resourceGroup().tags['Location']]",
+          "Environment": "[resourceGroup().tags['Environment']]",
+          "Owner": "[resourceGroup().tags['Owner']]",
+          "Organization": "[parameters('organization')]",
+          "Created Date": "[resourceGroup().tags['Created Date']]",
+          "Tier": "[resourceGroup().tags['Tier']]"
+        }
+      }
+    },
+    "variables": {
+      "deployment-prefix": "[concat('workload-', parameters('organization'))]",
+      "uniqueString": "[uniqueString(subscription().id, concat(variables('deployment-prefix'), '-log'))]",
+      "diagnostic-storageAccount-prefix": "[concat(, 'diag', replace(variables('deployment-prefix'), '-', ''))]",
+      "diagnostic-storageAccount-name": "[toLower(substring(replace(concat(variables('diagnostic-storageAccount-prefix'), variables('uniqueString'), variables('uniqueString')), '-', ''), 0, 23) )]",
+      "oms-workspace-name": "[concat('log-', variables('deployment-prefix'))]"
+    },
+    "resources": [
+      {
+        "comments": "—-DIAGNOSTICS STORAGE ACCOUNT—–",
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "[variables('diagnostic-storageAccount-name')]",
+        "apiVersion": "2019-06-01",
+        "location": "[resourceGroup().location]",
+        "kind": "StorageV2",
+        "sku": {
+          "name": "Standard_LRS",
+          "tier": "Standard"
+        },
+        "tags": "[parameters('tags')]",
+        "properties": {
+          "supportsHttpsTrafficOnly": true,
+          "networkAcls": {
+            "bypass": "AzureServices",
+            "defaultAction": "Deny"
+          }
+        }
+      },
+      {
+        "apiVersion": "2015-11-01-preview",
+        "location": "[parameters('location')]",
+        "name": "[variables('oms-workspace-name')]",
+        "properties": {
+          "sku": {
+            "Name": "[parameters('service-tier')]"
+          },
+          "retention": "[parameters('data-retention')]"
+        },
+        "tags": {},
+        "type": "Microsoft.OperationalInsights/workspaces"
+      }
+    ],
+    "outputs": {
+      "resourceID": {
+        "type": "string",
+        "value": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('oms-workspace-name'))]"
+      },
+      "workspaceName":{
+          "type": "string",
+          "value": "[variables('omsWorkspaceName')]"
+      },
+      "workspaceId":{
+          "type": "string",
+          "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2017-04-26-preview').customerId]"
+      },
+      "workspaceKey":{
+          "type": "string",
+          "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2017-04-26-preview').primarySharedKey]"
+      }
+    }
+  }
