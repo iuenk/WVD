@@ -3,7 +3,7 @@ name: 0-Create-Key-Vault
 on: workflow_dispatch
 
 env:
-  CUSTOMER_PREFIX: "ucorp"
+  SERVICE_PRINCIPAL_NAME: "githubactionazure"
   RESOURCE_GROUP: "ucorp-vault-rg"
   VAULT_NAME: "ucorp-wvd-kv"
 
@@ -25,7 +25,7 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
+          [string]$ServicePrincipalName = [System.Environment]::GetEnvironmentVariable('SERVICE_PRINCIPAL_NAME')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
 
@@ -44,7 +44,7 @@ jobs:
           $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
           $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force 
 
-          $spid = Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq "$CustomerPrefix-wvd-sp"} | select -ExpandProperty Id
+          $spid = Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id
 
           New-AzKeyVault -Name $VaultName -ResourceGroupName $ResourceGroup -Location "westeurope" -Sku "standard" -Tag $Tags
           Set-AzKeyVaultAccessPolicy -VaultName $VaultName -ObjectId $spid -PermissionsToSecrets get,set,delete,list
