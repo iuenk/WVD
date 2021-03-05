@@ -3,7 +3,6 @@ on: workflow_dispatch
 
 env:
   RESOURCE_GROUP: "ucorp-logging1-rg"
-  WORKSPACE_NAME: = "ucorp-wvds-law"
 
 jobs:
   build:
@@ -24,10 +23,11 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$WorkspaceName = [System.Environment]::GetEnvironmentVariable('WORKSPACE_NAME')
+          # [string]$WorkspaceName = [System.Environment]::GetEnvironmentVariable('WORKSPACE_NAME')
 
           $Tags = @{"Environment"="WVD Production"}
           $Location = "westeurope"
+          $WorkspaceName = "ucorp-wvdlog-law"
 
           # Create the resource group if needed
           try {
