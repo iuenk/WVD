@@ -58,7 +58,7 @@ jobs:
           $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-storage-Account.json")
               
           # storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-storage-Account.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Account.json"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
