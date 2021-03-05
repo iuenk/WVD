@@ -76,14 +76,14 @@ jobs:
           New-AzstorageShare -Name $fslogix -Context $storageContext
           New-AzstorageShare -Name $msix -Context $storageContext
 
-          #rechten nog zetten op de shares
-          $SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
-          $FslogixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogix"
-          $MsixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$msix"
+          # rechten nog zetten op de shares
+          #$SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
+          # $FslogixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogix"
+          # $MsixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$msix"
 
           # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
-          New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $FslogixID
-          New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixID
+          # New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $FslogixID
+          # New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixID
 
         azPSVersion: 'latest'
 
