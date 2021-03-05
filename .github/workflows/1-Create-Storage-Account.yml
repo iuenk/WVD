@@ -2,9 +2,8 @@ name: 1-Create-Storage-Account
 on: workflow_dispatch
 
 env:
-  CUSTOMER_PREFIX: "ucorp"
-  STORAGE_ACCOUNT: "ucorpwvdstorage"
-  RESOURCE_GROUP: "ucorp-storage-rg"
+  STORAGE_ACCOUNT: "ucorpwvdstorage1"
+  RESOURCE_GROUP: "ucorp-storage1-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
@@ -25,7 +24,6 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
