@@ -453,3 +453,4 @@
         "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2015-11-01-preview').portalUrl]"
       }
     }
+}
