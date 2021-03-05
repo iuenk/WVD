@@ -125,15 +125,15 @@
       },
       "workspaceName":{
           "type": "string",
-          "value": "[variables('omsWorkspaceName')]"
+          "value": "[variables('oms-workspace-name')]"
       },
       "workspaceId":{
           "type": "string",
-          "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2017-04-26-preview').customerId]"
+          "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('oms-workspace-name')), '2017-04-26-preview').customerId]"
       },
       "workspaceKey":{
           "type": "string",
-          "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2017-04-26-preview').primarySharedKey]"
+          "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('oms-workspace-name')), '2017-04-26-preview').primarySharedKey]"
       }
     }
   }
