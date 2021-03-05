@@ -32,7 +32,7 @@
       },
       "location": {
         "type": "string",
-        "defaultValue": "West US 2",
+        "defaultValue": "westeurope",
         "allowedValues": [
           "australiacentral",
           "australiaeast",
