@@ -74,7 +74,7 @@ jobs:
             "vmLocation" = "westeurope";
             "vmSize" = "Standard_D4s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
-            "vmNamePrefix" = $($CustomerPrefix)-WVD;
+            "vmNamePrefix" = "$($CustomerPrefix)-WVD";
             "vmImageType" = "CustomImage";
             "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}";
             "vmDiskType" = "StandardSSD_LRS";
