@@ -6,7 +6,7 @@ env:
   AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
   SIG: "ucorpwvdsig"                              # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
-  RESOURCE_GROUP: "ucorp-wvd-rg"
+  RESOURCE_GROUP: "ucorp-wvd1-rg"
   VAULT_NAME: "ucorp-wvd-kv"
   CUSTOMER_PREFIX: "Ucorp"
   
@@ -66,11 +66,11 @@ jobs:
             "addToWorkspace" = $true;
             "workSpaceName" = "$($CustomerPrefix)-wvd-Workspace";
             "workspaceLocation" = "westeurope";
-            "workspaceResourceGroup" = "$($CustomerPrefix)-wvd-rg";
+            "workspaceResourceGroup" = "$($CustomerPrefix)-wvd1-rg";
             "allApplicationGroupReferences" = "";
             "createAvailabilitySet" = $true;
             "customRdpProperty" = "audiocapturemode:i:1;camerastoredirect:s:*;"
-            "vmResourceGroup" = "$($CustomerPrefix)-wvd-rg";
+            "vmResourceGroup" = "$($CustomerPrefix)-wvd1-rg";
             "vmLocation" = "westeurope";
             "vmSize" = "Standard_D4s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
