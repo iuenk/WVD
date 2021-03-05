@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 env:
   RESOURCE_GROUP: "ucorp-logging1-rg"
-  WORKSPACE_NAME: = "ucorp-wvd1-law"
+  WORKSPACE_NAME: = "ucorp-wvds-law"
 
 jobs:
   build:
