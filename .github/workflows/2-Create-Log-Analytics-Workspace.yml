@@ -2,9 +2,8 @@ name: 2-Create-Log-Analytics-Workspace
 on: workflow_dispatch
 
 env:
-  CUSTOMER_PREFIX: "ucorp"
-  RESOURCE_GROUP: "ucorp-logging-rg"
-  WORKSPACE_NAME: = "ucorp-wvd-law"
+  RESOURCE_GROUP: "ucorp-logging1-rg"
+  WORKSPACE_NAME: = "ucorp-wvd1-law"
 
 jobs:
   build:
@@ -24,7 +23,6 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$WorkspaceName = [System.Environment]::GetEnvironmentVariable('WORKSPACE_NAME')
 
