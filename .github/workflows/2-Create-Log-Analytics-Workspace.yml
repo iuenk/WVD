@@ -23,7 +23,6 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          # [string]$WorkspaceName = [System.Environment]::GetEnvironmentVariable('WORKSPACE_NAME')
 
           $Tags = @{"Environment"="WVD Production"}
           $Location = "westeurope"
@@ -42,12 +41,44 @@ jobs:
           # List of solutions to enable
           $Solutions = "Updates", "AntiMalware", "LogManagement", "AzureResources", "LogicAppsManagement", "VMInsights"
 
+          # Saved Searches to import
+          # $ExportedSearches = @"
+          # [
+          #    {
+          #        "Category":  "My Saved Searches",
+          #        "DisplayName":  "WAD Events (All)",
+          #        "Query":  "Type=Event SourceSystem:AzureStorage ",
+          #        "Version":  1
+          #    },
+          #    {
+          #        "Category":  "My Saved Searches",
+          #        "DisplayName":  "Current Disk Queue Length",
+          #        "Query":  "Perf | where ObjectName == "LogicalDisk" and CounterName == "Current Disk Queue Length" and InstanceName == "C:"",
+          #        "Version":  1
+          #    }
+          # ]
+          # "@ | ConvertFrom-Json
+
+          # Custom Log to collect
+          # $CustomLog = @"
+          # {}
+          # "@
+
           # Add solutions
           foreach ($solution in $Solutions) {
               Set-AzOperationalInsightsIntelligencePack -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -IntelligencePackName $solution -Enabled $true
           }
 
+          # Import Saved Searches
+          #foreach ($search in $ExportedSearches) {
+          #    $id = $search.Category + "|" + $search.DisplayName
+          #    New-AzOperationalInsightsSavedSearch -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -SavedSearchId $id -DisplayName $search.DisplayName -Category $search.Category -Query $search.Query -Version $search.Version
+          }
+
           # Windows Event
           New-AzOperationalInsightsWindowsEventDataSource -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -EventLogName "Microsoft-Windows-Windows Defender/Operational" -CollectErrors -CollectWarnings -Name "Windows Defender"
+
+          # Custom Logs
+          # New-AzOperationalInsightsCustomLogDataSource -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -CustomLogRawJson "$CustomLog" -Name "Example Custom Log Collection"
 
         azPSVersion: 'latest'
