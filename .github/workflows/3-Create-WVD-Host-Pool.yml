@@ -108,5 +108,9 @@ jobs:
           # ARM Template file
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Tag $Tags -Verbose
-        
+          
+          Update-AzWvdDesktop -ResourceGroupName $ResourceGroup -ApplicationGroupName "$HostPoolName-DAG" -Name SessionDesktop -FriendlyName "$CustomerPrefix Workspace"
+          $ResourceIDHostPool = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -like $HostPoolName} | Select-Object -ExpandProperty ResourceID
+          New-AzWvdApplicationGroup -ResourceGroupName $ResourceGroup -Location "westeurope" -Name "$HostPoolName-RAG" -HostPoolArmPath $ResourceIDHostPool -ApplicationGroupType RemoteApp
+
         azPSVersion: 'latest'
