@@ -8,6 +8,7 @@ env:
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
   RESOURCE_GROUP: "ucorp-wvd1-rg"
   VAULT_NAME: "ucorp-wvd-kv"
+  SECURITY_GROUP: "SG_WVD_Users"
   CUSTOMER_PREFIX: "Ucorp"
   
 
@@ -32,6 +33,7 @@ jobs:
           [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
           [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
           [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
+          [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
@@ -109,8 +111,20 @@ jobs:
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Tag $Tags -Verbose
           
+          # Configuring WVD Application groups
           Update-AzWvdDesktop -ResourceGroupName $ResourceGroup -ApplicationGroupName "$HostPoolName-DAG" -Name SessionDesktop -FriendlyName "$CustomerPrefix Workspace"
           $ResourceIDHostPool = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -like $HostPoolName} | Select-Object -ExpandProperty ResourceID
           New-AzWvdApplicationGroup -ResourceGroupName $ResourceGroup -Location "westeurope" -Name "$HostPoolName-RAG" -HostPoolArmPath $ResourceIDHostPool -ApplicationGroupType RemoteApp
+
+          $ResourceIDDesktopGroup = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -eq "$HostPoolName-DAG"} | Select-Object -ExpandProperty ResourceID
+          $ResourceIDRemoteAppGroup = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -eq "$HostPoolName-RAG"} | Select-Object -ExpandProperty ResourceID
+
+          $ApplicationGroupReference = "$ResourceIDDesktopGroup","$ResourceIDRemoteAppGroup"
+          Update-AzWvdWorkspace -ResourceGroupName $ResourceGroup -Name "$CustomerPrefix-wvd-Workspace" -ApplicationGroupReference $ApplicationGroupReference
+
+          #Add AD group to new created Groups
+          $SecurityGroupId = Get-AZADGroup | Where-Object {$_.MailNickname -eq $SecurityGroup} | Select-Object -ExpandProperty Id
+          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-DAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
+          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-RAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
 
         azPSVersion: 'latest'
