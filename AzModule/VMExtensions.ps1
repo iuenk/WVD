@@ -1,35 +1,17 @@
 #>
-
-##########################################################################################################
-
-###############################
-
-## SCRIPT OPTIONS & PARAMETERS
-
-###############################
-
 #Requires -Version 3
-
 #Requires -Modules AzureRM
-
 # Version: 1.1
-
 <# - 28/07/2017
 
 * added progress bar and confirmation prompt.
-
 * added "-ProcessAllVMs" switch, without this script only processes 3 x VMs by default.
-
 * added parameter to specify a "SettingString" configuration file for Extension settings.
-
 * added counters to provide an "installation results" report when the script completes.
-
 - 14/07/2017
-
 * initial script creation.
 
 #>
-
 # Define and validate mandatory parameters
 
 [CmdletBinding () ]
@@ -37,12 +19,10 @@
 Param (
 
 # Azure Subscription Name
-
 [parameter ( Position =1) ]
 [string] $SubscriptionName = "SUBSCRIPTION NAME" ,
 
 # VM Extension Name (Case sensitive for "Extensions.id.Contains" comparison)
-
 [parameter ( Position =2) ]
 [string] $VMExtensionName = "BGInfo" ,
 
@@ -59,7 +39,6 @@ Param (
 [string] $VMExtensionSettingsFilePath = "" ,
 
 # Process All VMs in Subscription Switch, if not present script only processes first 3 VMs
-
 [parameter ( Position =7) ]
 [switch] $ProcessAllVMs
 
@@ -189,16 +168,6 @@ $VerbosePreference = "Continue"
     
     } else {
     
-    # Linux
-    
-    if ($ VM .OSProfile.LinuxConfiguration -and ( ! $ VMExtensionLinuxCompatible )) {
-    
-    # VM is running Linux distro and $VMExtensionLinuxCompatible = $false
-    
-    Write-Host "INFO: $($ VM .Name ) : Is running a Linux OS, extension $($ VMExtensionName ) is not compatible, skipping..."
-    
-    $Global : OSNotCompatibleCount ++
-    
     # Windows
     
     } elseif ($ VM .OSProfile.WindowsConfiguration -and ( ! $ VMExtensionWindowsCompatible )) {
@@ -230,22 +199,13 @@ $VerbosePreference = "Continue"
     # Setup counters for Extension installation results
     
     [double] $Global : SuccessCount = 0
-    
     [double] $Global : FailedCount = 0
-    
     [double] $Global : AlreadyInstalledCount = 0
-    
     [double] $Global : VMsNotRunningCount = 0
-    
     [double] $Global : OSNotCompatibleCount = 0
-    
     [string] $ DateTimeNow = get-date -Format "dd/MM/yyyy - HH:mm:ss"
     
-    Write-Host "n========================================================================n"
-    
     Write-Host " $($ DateTimeNow ) - Install VM Extension Script Starting...n"
-    
-    Write-Host "========================================================================n"
     
     # Prompt for confirmation...
     
@@ -261,72 +221,31 @@ $VerbosePreference = "Continue"
     
     # User prompt confirmation before processing
     
-    [string] $ UserPromptMessage = "Do you want to install the "" $($ VMExtensionName ) "" Extension on $($ VMTargetCount ) VMs in the "" $($ SubscriptionName ) "" Subscription?"
+    [string] $UserPromptMessage = "Do you want to install the "" $($ VMExtensionName ) "" Extension on $($ VMTargetCount ) VMs in the "" $($ SubscriptionName ) "" Subscription?"
     
-    if ( ! $ ProcessAllVMs .IsPresent ) {
+    if ( ! $ProcessAllVMs.IsPresent ) {
+        $UserPromptMessage = $UserPromptMessage + "nnNote: use the ""-ProcessAllVMs"" switch to install the Extension on ALL VMs."
+        }
     
-    $ UserPromptMessage = $ UserPromptMessage + "nnNote: use the ""-ProcessAllVMs"" switch to install the Extension on ALL VMs."
-    
-    }
-    
-    $ UserPromptMessage = $ UserPromptMessage + "nnType ""yes"" to confirm....nnt"
-    
-    [string] $ UserConfirmation = Read-Host -Prompt $ UserPromptMessage
-    
-    if ($ UserConfirmation .ToLower () -ne 'yes' ) {
-    
-    # Abort script, user reponse was NOT "yes"
-    
-    Write-Host "nUser typed "" $($ UserConfirmation ) "", Aborting script...nn" -ForegroundColor Red
-    
-    Exit
-    
-    } else {
-    
-    # Continue, user responded "yes" to confirm
-    
-    Write-Host "nUser typed 'yes' to confirm...." - ForegroundColor Green
-    
-    Write-Host "Processing...n"
-    
-    # Call Function to Install Extension on VMs
-    
-    Install-VMExtension
-    
-    }
+      # Call Function to Install Extension on VMs
+        Install-VMExtension
+        }
     
     # Add up all of the counters
-    
-    [double] $ TotalVMsProcessed = $Global : SuccessCount + $Global : FailedCount + $Global : AlreadyInstalledCount
-    
-    + $Global : VMsNotRunningCount + $Global : OSNotCompatibleCount
+    [double] $TotalVMsProcessed = $Global : SuccessCount + $Global : FailedCount + $Global : AlreadyInstalledCount + $Global : VMsNotRunningCount + $Global : OSNotCompatibleCount
     
     # Output Extension Installation Results
-    
-    Write-Host "n"
-    
+        Write-Host "n"
     Write-Host "========================================================================"
-    
     Write-Host "tExtension $($ VMExtensionName ) - Installation Resultsn"
-    
     Write-Host "Installation Successful:tt $($Global : SuccessCount ) "
-    
     Write-Host "Already Installed:ttt $($Global : AlreadyInstalledCount ) "
-    
     Write-Host "Installation Failed:ttt $($Global : FailedCount ) "
-    
     Write-Host "VMs Not Running:ttt $($Global : VMsNotRunningCount ) "
-    
     Write-Host "Extension Not Compatible with OS:t $($Global : OSNotCompatibleCount ) n"
-    
     Write-Host "Total VMs Processed:ttt $($ TotalVMsProcessed ) "
-    
     Write-Host "========================================================================nn"
-    
     [string] $ DateTimeNow = get-date -Format "dd/MM/yyyy - HH:mm:ss"
-    
     Write-Host "n========================================================================n"
-    
     Write-Host " $($ DateTimeNow ) - Install VM Extension Script Complete.n"
-    
     Write-Host "========================================================================n"

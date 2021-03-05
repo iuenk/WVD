@@ -107,6 +107,6 @@ jobs:
 
           # ARM Template file
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
-          New-AzResourceGroupDeployment -ResourceGroupName "$($CustomerPrefix)-wvd-rg" -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Tag $Tags -Verbose
+          New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Tag $Tags -Verbose
         
         azPSVersion: 'latest'
