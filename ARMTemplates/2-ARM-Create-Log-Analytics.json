@@ -99,9 +99,13 @@
         "Name": "[concat('AntiMalware', '(', parameters('workspaceName'), ')')]",
         "GalleryName": "AntiMalware"
       },
-      "SQLAssessment": {
-        "Name": "[Concat('SQLAssessment', '(', parameters('workspaceName'), ')')]",
-        "GalleryName": "SQLAssessment"
+      "VMInsights": {
+        "Name": "[Concat('VMInsights', '(', parameters('workspaceName'), ')')]",
+        "GalleryName": "VMInsights"
+      },
+      "LogicAppsManagement": {
+        "Name": "[Concat('LogicAppsManagement', '(', parameters('workspaceName'), ')')]",
+        "GalleryName": "LogicAppsManagement"
       },
       "diagnosticsStorageAccount": "[resourceId(parameters('applicationDiagnosticsStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('applicationDiagnosticsStorageAccountName'))]"
     },
@@ -235,18 +239,6 @@
           {
             "apiVersion": "2015-11-01-preview",
             "type": "datasources",
-            "name": "sampleSyslogCollection1",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "LinuxSyslogCollection",
-            "properties": {
-              "state": "Enabled"
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "datasources",
             "name": "sampleLinuxPerf1",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -276,67 +268,6 @@
               "objectName": "Logical Disk",
               "instanceName": "*",
               "intervalSeconds": 10
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "dataSources",
-            "name": "[concat(parameters('workspaceName'), parameters('customLogName'))]",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', '/', parameters('workspaceName'))]"
-            ],
-            "kind": "CustomLog",
-            "properties": {
-              "customLogName": "[parameters('customLogName')]",
-              "description": "this is a description",
-              "extractions": [
-                {
-                  "extractionName": "TimeGenerated",
-                  "extractionProperties": {
-                    "dateTimeExtraction": {
-                      "regex": [
-                        {
-                          "matchIndex": 0,
-                          "numberdGroup": null,
-                          "pattern": "((\\d{2})|(\\d{4}))-([0-1]\\d)-(([0-3]\\d)|(\\d))\\s((\\d)|([0-1]\\d)|(2[0-4])):[0-5][0-9]:[0-5][0-9]"
-                        }
-                      ]
-                    }
-                  },
-                  "extractionType": "DateTime"
-                }
-              ],
-              "inputs": [
-                {
-                  "location": {
-                    "fileSystemLocations": {
-                      "linuxFileTypeLogPaths": null,
-                      "windowsFileTypeLogPaths": [
-                        "[concat('c:\\Windows\\Logs\\',parameters('customLogName'))]"
-                      ]
-                    }
-                  },
-                  "recordDelimiter": {
-                    "regexDelimiter": {
-                      "matchIndex": 0,
-                      "numberdGroup": null,
-                      "pattern": "(^.*((\\d{2})|(\\d{4}))-([0-1]\\d)-(([0-3]\\d)|(\\d))\\s((\\d)|([0-1]\\d)|(2[0-4])):[0-5][0-9]:[0-5][0-9].*$)"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "datasources",
-            "name": "sampleLinuxPerfCollection1",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "LinuxPerformanceCollection",
-            "properties": {
-              "state": "Enabled"
             }
           },
           {
@@ -400,9 +331,9 @@
           {
             "apiVersion": "2015-11-01-preview",
             "location": "[parameters('location')]",
-            "name": "[variables('SQLAssessment').Name]",
+            "name": "[variables('VMInsights').Name]",
             "type": "Microsoft.OperationsManagement/solutions",
-            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('SQLAssessment').Name)]",
+            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('VMInsights').Name)]",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -410,9 +341,28 @@
               "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             },
             "plan": {
-              "name": "[variables('SQLAssessment').Name]",
+              "name": "[variables('VMInsights').Name]",
               "publisher": "Microsoft",
-              "product": "[Concat('OMSGallery/', variables('SQLAssessment').GalleryName)]",
+              "product": "[Concat('OMSGallery/', variables('VMInsights').GalleryName)]",
+              "promotionCode": ""
+            }
+          },
+          {
+            "apiVersion": "2015-11-01-preview",
+            "location": "[parameters('location')]",
+            "name": "[variables('LogicAppsManagement').Name]",
+            "type": "Microsoft.OperationsManagement/solutions",
+            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('LogicAppsManagement').Name)]",
+            "dependsOn": [
+              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            ],
+            "properties": {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            },
+            "plan": {
+              "name": "[variables('LogicAppsManagement').Name]",
+              "publisher": "Microsoft",
+              "product": "[Concat('OMSGallery/', variables('LogicAppsManagement').GalleryName)]",
               "promotionCode": ""
             }
           }
