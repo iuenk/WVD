@@ -126,21 +126,6 @@
         },
         "resources": [
           {
-            "apiVersion": "2015-03-20",
-            "name": "VMSS Queries2",
-            "type": "savedSearches",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "properties": {
-              "eTag": "*",
-              "category": "VMSS",
-              "displayName": "VMSS Instance Count",
-              "query": "Event | where Source == \"ServiceFabricNodeBootstrapAgent\" | summarize AggregatedValue = count() by Computer",
-              "version": 1
-            }
-          },
-          {
             "apiVersion": "2017-04-26-preview",
             "name": "Cross workspace function",
             "type": "savedSearches",
@@ -169,7 +154,7 @@
             ],
             "kind": "WindowsEvent",
             "properties": {
-              "eventLogName": "Application",
+              "eventLogName": "Microsoft-Windows-Windows Defender/Operational",
               "eventTypes": [
                 {
                   "eventType": "Error"
@@ -193,18 +178,6 @@
               "instanceName": "*",
               "intervalSeconds": 10,
               "counterName": "Available MBytes"
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "datasources",
-            "name": "sampleIISLog1",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "IISLogs",
-            "properties": {
-              "state": "OnPremiseEnabled"
             }
           },
           {
