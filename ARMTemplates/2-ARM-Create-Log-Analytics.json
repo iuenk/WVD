@@ -170,71 +170,23 @@
             "properties": {
               "objectName": "Memory",
               "instanceName": "*",
-              "intervalSeconds": 10,
+              "intervalSeconds": 300,
               "counterName": "Available MBytes"
             }
           },
           {
             "apiVersion": "2015-11-01-preview",
             "type": "datasources",
-            "name": "sampleSyslog1",
+            "name": "sampleWindowsPerfCounter2",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
-            "kind": "LinuxSyslog",
+            "kind": "WindowsPerformanceCounter",
             "properties": {
-              "syslogName": "kern",
-              "syslogSeverities": [
-                {
-                  "severity": "emerg"
-                },
-                {
-                  "severity": "alert"
-                },
-                {
-                  "severity": "crit"
-                },
-                {
-                  "severity": "err"
-                },
-                {
-                  "severity": "warning"
-                }
-              ]
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "datasources",
-            "name": "sampleLinuxPerf1",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "LinuxPerformanceObject",
-            "properties": {
-              "performanceCounters": [
-                {
-                  "counterName": "% Used Inodes"
-                },
-                {
-                  "counterName": "Free Megabytes"
-                },
-                {
-                  "counterName": "% Used Space"
-                },
-                {
-                  "counterName": "Disk Transfers/sec"
-                },
-                {
-                  "counterName": "Disk Reads/sec"
-                },
-                {
-                  "counterName": "Disk Writes/sec"
-                }
-              ],
               "objectName": "Logical Disk",
               "instanceName": "*",
-              "intervalSeconds": 10
+              "intervalSeconds": 300,
+              "counterName": "Free Megabytes"
             }
           },
           {
