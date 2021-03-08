@@ -120,63 +120,64 @@
         },
         "resources": [
           {
-            "apiVersion": "2015-11-01-preview",
-            "type": "dataSources",
-            "name": "WindowsEventDefender",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "WindowsEvent",
-            "properties": {
-              "eventLogName": "Microsoft-Windows-Windows Defender/Operational",
-              "eventTypes": [
-                {
-                  "eventType": "Error"
-                },
-                {
-                  "eventType": "Warning"
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2020-08-01",
+            "name": "[parameters('workspaceName')]",
+            "location": "[parameters('location')]",
+            "resources": [
+              {
+                "apiVersion": "2020-08-01",
+                "type": "dataSources",
+                "name": "WindowsEventDefender",
+                "dependsOn": [
+                  "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                ],
+                "kind": "WindowsEvent",
+                "properties": {
+                  "eventLogName": "Microsoft-Windows-Windows Defender/Operational",
+                  "eventTypes": [
+                    {
+                      "eventType": "Error"
+                    },
+                    {
+                      "eventType": "Warning"
+                    }
+                  ]
                 }
-              ]
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "dataSources",
-            "name": "WindowsMemoryAvailableBytes",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "WindowsPerformanceCounter",
-            "properties": {
-              "objectName": "Memory",
-              "instanceName": "*",
-              "intervalSeconds": 300,
-              "counterName": "Available MBytes"
-            }
-          },
-          {
-            "apiVersion": "2015-11-01-preview",
-            "type": "dataSources",
-            "name": "WindowsPerformanceLogicalDisk",
-            "dependsOn": [
-              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-            ],
-            "kind": "WindowsPerformanceCounter",
-            "properties": {
-              "objectName": "Logical Disk",
-              "instanceName": "*",
-              "intervalSeconds": 300,
-              "performanceCounters": [
-                  {
-                    "counterName": "Free Megabytes"
-                  },
-                  {
-                    "counterName": "% Used Space"
-                  }
-                ]
-            }
-          },
-          {
+              },
+              {
+                "apiVersion": "2020-08-01",
+                "type": "dataSources",
+                "name": "WindowsMemoryAvailableBytes",
+                "dependsOn": [
+                  "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                ],
+                "kind": "WindowsPerformanceCounter",
+                "properties": {
+                  "objectName": "Memory",
+                  "instanceName": "*",
+                  "intervalSeconds": 300,
+                  "counterName": "Available MBytes"
+                }
+              },
+              {
+                "apiVersion": "2020-08-01",
+                "type": "dataSources",
+                "name": "WindowsPerformanceLogicalDisk",
+                "dependsOn": [
+                  "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                ],
+                "kind": "WindowsPerformanceCounter",
+                "properties": {
+                  "objectName": "Logical Disk",
+                  "instanceName": "*",
+                  "intervalSeconds": 300,
+                  "counterName": "Free Megabytes"
+                }
+              }
+          ]
+        },
+      {
             "apiVersion": "2015-03-20",
             "name": "[concat(parameters('applicationDiagnosticsStorageAccountName'),parameters('workspaceName'))]",
             "type": "storageinsightconfigs",
