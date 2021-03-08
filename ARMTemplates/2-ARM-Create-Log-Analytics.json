@@ -140,9 +140,9 @@
             }
           },
           {
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "2020-08-01",
             "type": "datasources",
-            "name": "WindowsDefender",
+            "name": "WindowsEventDefender",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -160,9 +160,9 @@
             }
           },
           {
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "2020-08-01",
             "type": "datasources",
-            "name": "WindowsApplication",
+            "name": "WindowsEventApplication",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -180,9 +180,9 @@
             }
           },
           {
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "2020-08-01",
             "type": "datasources",
-            "name": "WindowsSystem",
+            "name": "WindowsEventSystem",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
