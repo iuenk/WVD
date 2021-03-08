@@ -2,7 +2,9 @@ name: 2-Create-Log-Analytics-Workspace
 on: workflow_dispatch
 
 env:
-  RESOURCE_GROUP: "ucorp-logging1-rg"
+  RESOURCE_GROUP: "ucorp-logging-rg"
+  STORAGE_ACCOUNT_GROUP: "ucorp-storage-rg"
+  STORAGE_ACCOUNT_NAME: "ucorpwvdstorage"
 
 jobs:
   build:
@@ -23,62 +25,40 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
+          [string]$StorageAccoutResourceGroup = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT_GROUP')
+          [string]$StorageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT_NAME')
 
           $Tags = @{"Environment"="WVD Production"}
-          $Location = "westeurope"
           $WorkspaceName = "ucorp-wvdlog-law"
 
           # Create the resource group if needed
           try {
-              Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
+            Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
           } catch {
-              New-AzResourceGroup -Name $ResourceGroup -Location $Location -Tag $Tags
-          }
-          
-          # Create the workspace
-          New-AzOperationalInsightsWorkspace -Location $Location -Name $WorkspaceName -Sku Standard -ResourceGroupName $ResourceGroup -Tag $Tags -Verbose
-
-          # List of solutions to enable
-          $Solutions = "Updates", "AntiMalware", "LogManagement", "AzureResources", "LogicAppsManagement", "VMInsights"
-
-          # Saved Searches to import
-          # $ExportedSearches = @"
-          # [
-          #    {
-          #        "Category":  "My Saved Searches",
-          #        "DisplayName":  "WAD Events (All)",
-          #        "Query":  "Type=Event SourceSystem:AzureStorage ",
-          #        "Version":  1
-          #    },
-          #    {
-          #        "Category":  "My Saved Searches",
-          #        "DisplayName":  "Current Disk Queue Length",
-          #        "Query":  "Perf | where ObjectName == "LogicalDisk" and CounterName == "Current Disk Queue Length" and InstanceName == "C:"",
-          #        "Version":  1
-          #    }
-          # ]
-          # "@ | ConvertFrom-Json
-
-          # Custom Log to collect
-          # $CustomLog = @"
-          # {}
-          # "@
-
-          # Add solutions
-          foreach ($solution in $Solutions) {
-              Set-AzOperationalInsightsIntelligencePack -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -IntelligencePackName $solution -Enabled $true
+            New-AzResourceGroup -Name $ResourceGroup -Location "westeurope" -Tag $Tags
           }
 
-          # Import Saved Searches
-          #foreach ($search in $ExportedSearches) {
-          #    $id = $search.Category + "|" + $search.DisplayName
-          #    New-AzOperationalInsightsSavedSearch -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -SavedSearchId $id -DisplayName $search.DisplayName -Category $search.Category -Query $search.Query -Version $search.Version
+          ## Create a Template Parameter Object (hashtable)
+          $objTemplateParameter = @{
+          "workspaceName" = $WorkspaceName;
+          "location" = "westeurope";
+          "dataRetention" = 30;
+          "sku" = "PerGB2018";
+          "applicationDiagnosticsStorageAccountResourceGroup" = $StorageAccoutResourceGroup;
+          "applicationDiagnosticsStorageAccountName" = $StorageAccountName;
           }
 
-          # Windows Event
-          New-AzOperationalInsightsWindowsEventDataSource -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -EventLogName "Microsoft-Windows-Windows Defender/Operational" -CollectErrors -CollectWarnings -Name "Windows Defender"
+          # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
+          $jsonARMTemplateFile = [string]($env:TEMP + "\2-ARM-Create-Log-Analytics.json")
+                
+          # storage location for custom ARM template
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/2-ARM-Create-Log-Analytics.json"
 
-          # Custom Logs
-          # New-AzOperationalInsightsCustomLogDataSource -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -CustomLogRawJson "$CustomLog" -Name "Example Custom Log Collection"
+          # Retrieve the template file and save it in a temp file location
+          Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
+
+          # ARM Template file
+          ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
+          New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
         azPSVersion: 'latest'
