@@ -142,7 +142,7 @@
           {
             "apiVersion": "2015-11-01-preview",
             "type": "datasources",
-            "name": "sampleWindowsEvent1",
+            "name": "WindowsDefender",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -162,7 +162,47 @@
           {
             "apiVersion": "2015-11-01-preview",
             "type": "datasources",
-            "name": "sampleWindowsPerfCounter1",
+            "name": "WindowsApplication",
+            "dependsOn": [
+              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            ],
+            "kind": "WindowsEvent",
+            "properties": {
+              "eventLogName": "Application",
+              "eventTypes": [
+                {
+                  "eventType": "Error"
+                },
+                {
+                  "eventType": "Warning"
+                }
+              ]
+            }
+          },
+          {
+            "apiVersion": "2015-11-01-preview",
+            "type": "datasources",
+            "name": "WindowsSystem",
+            "dependsOn": [
+              "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            ],
+            "kind": "WindowsEvent",
+            "properties": {
+              "eventLogName": "System",
+              "eventTypes": [
+                {
+                  "eventType": "Error"
+                },
+                {
+                  "eventType": "Warning"
+                }
+              ]
+            }
+          },
+          {
+            "apiVersion": "2015-11-01-preview",
+            "type": "datasources",
+            "name": "WindowsMemoryPerfCounter",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -177,7 +217,7 @@
           {
             "apiVersion": "2015-11-01-preview",
             "type": "datasources",
-            "name": "sampleWindowsPerfCounter2",
+            "name": "WindowsLogicalDiskPerfCounter",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
