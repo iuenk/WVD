@@ -128,7 +128,7 @@
             ],
             "kind": "WindowsEvent",
             "properties": {
-              "eventLogName": "Microsoft-Windows-Windows Defender/Operational, Application, System",
+              "eventLogName": "Microsoft-Windows-Windows Defender/Operational",
               "eventTypes": [
                 {
                   "eventType": "Error"
@@ -142,7 +142,7 @@
           {
             "apiVersion": "2015-11-01-preview",
             "type": "dataSources",
-            "name": "WindowsMemoryPerfCounter",
+            "name": "WindowsMemoryAvailableBytes",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -157,7 +157,7 @@
           {
             "apiVersion": "2015-11-01-preview",
             "type": "dataSources",
-            "name": "WindowsLogicalDiskPerfCounter",
+            "name": "WindowsPerformanceLogicalDisk",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -166,7 +166,14 @@
               "objectName": "Logical Disk",
               "instanceName": "*",
               "intervalSeconds": 300,
-              "counterName": "Free Megabytes"
+              "performanceCounters": [
+                  {
+                    "counterName": "Free Megabytes"
+                  },
+                  {
+                    "counterName": "% Used Space"
+                  }
+                ]
             }
           },
           {
