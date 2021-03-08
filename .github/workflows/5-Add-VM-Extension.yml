@@ -30,7 +30,7 @@ jobs:
           $PublicSettings = @{"workspaceId" = "94584c69-48d1-4c8f-94cf-d8184dd0cd11"}
           $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName "ucorp-storage-rg" -Name $WorkspaceName).PrimarySharedKey
           $ProtectedSettings = @{"workspaceKey" = $key}
-          $FileUri = @("https://raw.githubusercontent.com/iuenk/WVD/main/AzModule/Virtual-Desktop-Optimalization-Tool-20H2.ps1")
+          $FileUri = @("https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/Virtual-Desktop-Optimalization-Tool-20H2.ps1")
           $Settings = @{"fileUris" = $FileUri};
           $OptimalizationPack = @{"commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File Virtual-Desktop-Optimalization-Tool-20H2.ps1"};
           $Location = "westeurope"
