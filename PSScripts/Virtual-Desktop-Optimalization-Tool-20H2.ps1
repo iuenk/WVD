@@ -1,7 +1,7 @@
 $path ="C:\Packages\"
 $ErrorActionPreference = 'SilentlyContinue'
 
-$OptimalizationToolURL="https://github.com/iuenk/WVD/blob/main/AzModule/Virtual-Desktop-Optimization-Tool-custom-20h2.zip?raw=true"
+$OptimalizationToolURL="https://github.com/iuenk/WVD/blob/main/PSScripts/Virtual-Desktop-Optimization-Tool-custom-20h2.zip?raw=true"
 $installerFile="Virtual-Desktop-Optimization-Tool-custom-20h2.zip"
 
 mkdir $path -ErrorAction SilentlyContinue
