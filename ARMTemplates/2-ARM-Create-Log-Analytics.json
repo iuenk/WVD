@@ -32,13 +32,6 @@
         "description": "Number of days of retention. Workspaces in the legacy Free pricing tier can only have 7 days."
       }
     },
-    "immediatePurgeDataOn30Days": {
-      "type": "bool",
-      "defaultValue": "[bool('false')]",
-      "metadata": {
-        "description": "If set to true, changing retention to 30 days will immediately delete older data. Use this with extreme caution. This only applies when retention is being set to 30 days."
-      }
-    },
     "location": {
       "type": "string",
       "allowedValues": [
@@ -112,7 +105,6 @@
       "properties": {
         "retentionInDays": "[parameters('dataRetention')]",
         "features": {
-          "immediatePurgeDataOn30Days": "[parameters('immediatePurgeDataOn30Days')]"
         },
         "sku": {
           "name": "[parameters('sku')]"
@@ -292,10 +284,6 @@
     "retentionInDays": {
       "type": "int",
       "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2015-11-01-preview').retentionInDays]"
-    },
-    "immediatePurgeDataOn30Days": {
-      "type": "bool",
-      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2015-11-01-preview').features.immediatePurgeDataOn30Days]"
     }
   }
 }
