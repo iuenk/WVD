@@ -58,22 +58,14 @@ $VerbosePreference = "Continue"
     # Loop through all VMs in the Subscription
     ForEach ($VM in $VMs ) {
     
-    # Check if the ProcessAllVMs switch has NOT been set
-    if ( ! $ProcessAllVMs.IsPresent ) {
-    
-    # Break out of the ForEach Loop to stop processing
-    
-    Break
-    
-    }
     
     }
     
     # Ensure the VM OS is Compatible with Extension
-    if (($ VM .OSProfile.WindowsConfiguration -and $ VMExtensionWindowsCompatible ) -or ($ VM .OSProfile.LinuxConfiguration -and $ VMExtensionLinuxCompatible ))
+    if (($ VM.OSProfile.WindowsConfiguration -and $ VMExtensionWindowsCompatible ) -or ($ VM .OSProfile.LinuxConfiguration -and $ VMExtensionLinuxCompatible ))
     
     # Ensure the Extension is NOT already installed
-    if (($ VM .Extensions.count -eq 0 ) -or ( ! ( Split-Path -Leaf $ VM .Extensions.id ) .Contains ($ VMExtensionName ))) {
+    if (($ VM.Extensions.count -eq 0 ) -or ( ! ( Split-Path -Leaf $ VM .Extensions.id ) .Contains ($ VMExtensionName ))) {
     
     # If VM is Running
     if ( $VM.PowerState -eq 'VM running' ) {

@@ -90,7 +90,7 @@ jobs:
             "hostpoolType" = "Pooled";
             "maxSessionLimit" = 8;
             "loadBalancerType" = "DepthFirst";
-            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-wvd`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard D4s v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
+            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-wvd`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard_D4s_v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
             "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
             "apiVersion" = "2019-12-10-preview";
             "administratorAccountUsername" = "$($domainAdminUser)";
