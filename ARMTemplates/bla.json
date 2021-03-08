@@ -105,7 +105,7 @@
     },
     "resources": [
       {
-        "apiVersion": "2020-08-01",
+        "apiVersion": "2017-03-15-preview",
         "type": "Microsoft.OperationalInsights/workspaces",
         "name": "[parameters('workspaceName')]",
         "location": "[parameters('location')]",
@@ -120,15 +120,15 @@
         },
         "resources": [
           {
-            "apiVersion": "2020-08-01",
+            "apiVersion": "2015-11-01-preview",
             "type": "dataSources",
-            "name": "WindowsEventDefender",
+            "name": "WindowsEventApplication",
             "dependsOn": [
               "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
             "kind": "WindowsEvent",
             "properties": {
-              "eventLogName": "Microsoft-Windows-Windows Defender/Operational",
+              "eventLogName": "Application",
               "eventTypes": [
                 {
                   "eventType": "Error"
@@ -140,7 +140,7 @@
             }
           },
           {
-            "apiVersion": "2020-08-01",
+            "apiVersion": "2015-11-01-preview",
             "type": "dataSources",
             "name": "WindowsMemoryAvailableBytes",
             "dependsOn": [
@@ -155,7 +155,7 @@
             }
           },
           {
-            "apiVersion": "2020-08-01",
+            "apiVersion": "2015-11-01-preview",
             "type": "dataSources",
             "name": "WindowsPerformanceLogicalDisk",
             "dependsOn": [
@@ -166,16 +166,9 @@
               "objectName": "Logical Disk",
               "instanceName": "*",
               "intervalSeconds": 300,
-              "performanceCounters": [
-                  {
-                    "counterName": "Free Megabytes"
-                  },
-                  {
-                    "counterName": "% Used Space"
-                  }
-                ]
-            }
-          },
+              "counterName": "Free Megabytes"
+              }
+            },
           {
             "apiVersion": "2015-03-20",
             "name": "[concat(parameters('applicationDiagnosticsStorageAccountName'),parameters('workspaceName'))]",
