@@ -2,7 +2,7 @@ $path ="C:\Packages\"
 $ErrorActionPreference = 'SilentlyContinue'
 
 $OptimalizationToolURL="https://github.com/iuenk/WVD/blob/main/AzModule/Virtual-Desktop-Optimization-Tool-custom-20h2.zip?raw=true"
-$installerFile="Virtual-Desktop-Optimization-Tool-master-Custom.zip"
+$installerFile="Virtual-Desktop-Optimization-Tool-custom-20h2.zip"
 
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 
