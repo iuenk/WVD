@@ -2,8 +2,8 @@ name: 1-Create-Storage-Account
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "ucorpwvdstorage1"
-  RESOURCE_GROUP: "ucorp-storage1-rg"
+  STORAGE_ACCOUNT: "ucorpwvdstorage2"
+  RESOURCE_GROUP: "ucorp-storage2-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
