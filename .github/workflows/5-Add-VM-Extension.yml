@@ -2,8 +2,8 @@ name: 5-Add-VM-Extension
 on: workflow_dispatch
 
 env:
-  RESOURCE_GROUP: "ucorp-wvd-rg"
-  WORKSPACE_NAME: "ucorp-wvd-law"
+  RESOURCE_GROUP: "ucorp-wvd1-rg"
+  WORKSPACE_NAME: "ucorp-wvd1-law"
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
 
           $Tags = @{"Environment"="WVD Production"}
           $PublicSettings = @{"workspaceId" = "94584c69-48d1-4c8f-94cf-d8184dd0cd11"}
-          $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName "ucorp-storage-rg" -Name $WorkspaceName).PrimarySharedKey
+          $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName "ucorp-storage1-rg" -Name $WorkspaceName).PrimarySharedKey
           $ProtectedSettings = @{"workspaceKey" = $key}
           $FileUri = @("https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/Virtual-Desktop-Optimalization-Tool-20H2.ps1")
           $Settings = @{"fileUris" = $FileUri};

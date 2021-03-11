@@ -3,8 +3,8 @@ on: workflow_dispatch
 
 env:
   RESOURCE_GROUP: "ucorp-logging-rg"
-  STORAGE_ACCOUNT_GROUP: "ucorp-storage-rg"
-  STORAGE_ACCOUNT_NAME: "ucorpwvdstorage"
+  STORAGE_ACCOUNT_GROUP: "ucorp-storage1-rg"
+  STORAGE_ACCOUNT_NAME: "ucorpwvdstorage1"
 
 jobs:
   build:
