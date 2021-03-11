@@ -68,11 +68,11 @@ jobs:
             "addToWorkspace" = $true;
             "workSpaceName" = "$($CustomerPrefix)-wvd-Workspace";
             "workspaceLocation" = "westeurope";
-            "workspaceResourceGroup" = "$($CustomerPrefix)-wvd1-rg";
+            "workspaceResourceGroup" = $ResourceGroup;
             "allApplicationGroupReferences" = "";
             "createAvailabilitySet" = $true;
             "customRdpProperty" = "audiocapturemode:i:1;camerastoredirect:s:*;"
-            "vmResourceGroup" = "$($CustomerPrefix)-wvd1-rg";
+            "vmResourceGroup" = $ResourceGroup;
             "vmLocation" = "westeurope";
             "vmSize" = "Standard_D4s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
