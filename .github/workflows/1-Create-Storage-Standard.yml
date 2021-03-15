@@ -2,7 +2,7 @@ name: 1-Create-Storage-Standard
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "wvdstoragestd"
+  STORAGE_ACCOUNT: "ucorpwvdstd"
   RESOURCE_GROUP: "ucorp-storage-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 

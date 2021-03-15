@@ -2,7 +2,7 @@ name: 1-Create-Storage-Premium
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "wvdstorageprem"
+  STORAGE_ACCOUNT: "ucorpwvdprem"
   RESOURCE_GROUP: "ucorp-storage-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
