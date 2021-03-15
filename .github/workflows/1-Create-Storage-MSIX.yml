@@ -2,7 +2,7 @@ name: 1-Create-Storage-MSIX
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "wvdstorageprem"
+  STORAGE_ACCOUNT: "wvdstoragestd"
   RESOURCE_GROUP: "ucorp-storage-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
@@ -49,8 +49,8 @@ jobs:
           "allowSharedKeyAccess" = $true;
           "networkAclsBypass" = "AzureServices";
           "networkAclsDefaultAction" = "Allow";
-          "accountType" = "Premium_LRS";
-          "kind" = "FileStorage";
+          "accountType" = "Standard_LRS";
+          "kind" = "StorageV2";
           "isShareSoftDeleteEnabled" = $true;
           "shareSoftDeleteRetentionDays" = 90;
           }
@@ -69,27 +69,10 @@ jobs:
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
           # Create file shares fslogix and msixappattach
-          # $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
-          # $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
+          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
+          $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
 
-          $fslogixOffice = "fslogixoffice"
-          $fslogixProfiles = "fslogixprofiles"
           $msix = "msixappattach"
-          # New-AzstorageShare -Name $fslogix -Context $storageContext
-          # New-AzstorageShare -Name $msix -Context $storageContext
-
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixOffice -QuotaGiB 100
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixProfiles -QuotaGiB 100
-
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $msix -AccessTier TransactionOptimized -QuotaGiB 10
-
-          # rechten nog zetten op de shares
-          #$SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
-          # $FslogixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogix"
-          # $MsixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$msix"
-
-          # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
-          # New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $FslogixID
-          # New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixID
+          New-AzstorageShare -Name $msix -Context $storageContext
 
         azPSVersion: 'latest'
