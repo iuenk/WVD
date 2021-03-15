@@ -1,14 +1,14 @@
-name: 1-Create-Storage-Account
+name: 1-Create-Storage-Premium
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "ucorpwvdstorageprem"
+  STORAGE_ACCOUNT: "wvdstorageprem"
   RESOURCE_GROUP: "ucorp-storage-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
   build:
-    name: 1-Create-Storage-Account
+    name: 1-Create-Storage-Premium
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
@@ -24,6 +24,7 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
+          # BEWARE $StorageAccountName cannot be longer than 15 characters
           [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
@@ -67,28 +68,10 @@ jobs:
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
-          # Create file shares fslogix and msixappattach
-          # $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
-          #$ storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
+          $fslogixOffice = "fslogixoffice"
+          $fslogixProfiles = "fslogixprofiles"
 
-          $fslogixO365 = "fslogixO365"
-          $fslogixProfiles = "fslogixProfiles"
-          $msix = "msixappattach"
-          # New-AzstorageShare -Name $fslogix -Context $storageContext
-          # New-AzstorageShare -Name $msix -Context $storageContext
-
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroupName -StorageAccountName $storageAccountName -Name $fslogixO365 -AccessTier Premium -QuotaGiB 5
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroupName -StorageAccountName $storageAccountName -Name $fslogixProfiles -AccessTier Premium -QuotaGiB 10
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroupName -StorageAccountName $storageAccountName -Name $msix -AccessTier TransactionOptimized -QuotaGiB 10
-
-          # rechten nog zetten op de shares
-          #$SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
-          # $FslogixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogix"
-          # $MsixID = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$msix"
-
-          # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
-          # New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $FslogixID
-          # New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixID
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixOffice -QuotaGiB 100
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixProfiles -QuotaGiB 100
 
         azPSVersion: 'latest'
-
