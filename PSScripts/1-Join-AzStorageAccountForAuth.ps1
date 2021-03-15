@@ -43,12 +43,15 @@ Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountNa
 
 $fslogixOffice = "fslogixoffice"
 $fslogixProfiles = "fslogixprofiles"
+$Msix = "msixappattach"
 
 # rechten nog zetten op de shares
 $SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
 $fslogixOfficeId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogixOffice"
 $fslogixProfilesId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogixProfiles"
+$MsixId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$Msix"
 
 # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
 New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixOfficeId
 New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixProfilesId
+New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixId
