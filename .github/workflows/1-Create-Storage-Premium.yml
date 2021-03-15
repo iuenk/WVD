@@ -1,14 +1,14 @@
-name: 1-Create-Storage-MSIX
+name: 1-Create-Storage-Premium
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "wvdstoragestd"
+  STORAGE_ACCOUNT: "wvdstorageprem"
   RESOURCE_GROUP: "ucorp-storage-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
   build:
-    name: 1-Create-Storage-MSIX
+    name: 1-Create-Storage-Premium
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
@@ -49,8 +49,8 @@ jobs:
           "allowSharedKeyAccess" = $true;
           "networkAclsBypass" = "AzureServices";
           "networkAclsDefaultAction" = "Allow";
-          "accountType" = "Standard_LRS";
-          "kind" = "StorageV2";
+          "accountType" = "Premium_LRS";
+          "kind" = "FileStorage";
           "isShareSoftDeleteEnabled" = $true;
           "shareSoftDeleteRetentionDays" = 90;
           }
@@ -59,7 +59,7 @@ jobs:
           $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-storage-Account.json")
               
           # storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Account.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Premium.json"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
@@ -68,11 +68,10 @@ jobs:
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
-          # Create file shares fslogix and msixappattach
-          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
-          $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
+          $fslogixOffice = "fslogixoffice"
+          $fslogixProfiles = "fslogixprofiles"
 
-          $msix = "msixappattach"
-          New-AzstorageShare -Name $msix -Context $storageContext
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixOffice -QuotaGiB 100
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixProfiles -QuotaGiB 100
 
         azPSVersion: 'latest'
