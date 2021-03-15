@@ -2,7 +2,8 @@
 $TenantId = "a2de9bda-ffed-4527-96d7-d6f3ac10da8c"
 $SubscriptionId = "438eedbe-4df3-42b6-9bd2-5b7f8a069f4b"
 $ResourceGroup = "ucorp-storage-rg"
-$StorageAccountName = "ucorpwvdstorage"
+$StorageAccountStd = "wvdstoragestd"
+$StorageAccountPrem = "wvdstorageprem"
 $ServicePrincipalName = "githubactionazure"
 $servicePrincipalApplicationID = (Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id)
 $servicePrincipalPassword = "accesskey"
@@ -37,7 +38,8 @@ Connect-AzAccount -ServicePrincipal -Credential $ServicePrincipalCreds  -Tenant 
 Select-AzSubscription -SubscriptionId $SubscriptionId 
 
 # Register the target storage account with your active directory environment under the target OU (for example: specify the OU with Name as "UserAccounts" or DistinguishedName as "OU=UserAccounts,DC=CONTOSO,DC=COM").
-Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountName -DomainAccountType "ComputerAccount"
+Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountStd -DomainAccountType "ComputerAccount"
+Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountPrem -DomainAccountType "ComputerAccount"
 
 $fslogixOffice = "fslogixoffice"
 $fslogixProfiles = "fslogixprofiles"
