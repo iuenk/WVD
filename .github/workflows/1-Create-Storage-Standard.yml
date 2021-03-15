@@ -56,7 +56,7 @@ jobs:
           }
 
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-storage-Account.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-Storage-Standard.json")
               
           # storage location for custom ARM template
           $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Standard.json"
