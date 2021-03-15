@@ -8,7 +8,7 @@ env:
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
   VAULT_NAME: "ucorp-wvd-kv"
   CUSTOMER_PREFIX: "ucorp"
-  VMSIZE: "Standard_D4s_v3"
+  VMSIZE: "Standard_D8s_v3"
 
 jobs:
   build:

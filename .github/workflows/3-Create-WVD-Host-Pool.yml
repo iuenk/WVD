@@ -6,12 +6,11 @@ env:
   AZURE_NUMBER_OF_INSTANCES: 1                    # Number of instances to add to the WVD Hostpool
   SIG: "ucorpwvdsig"                              # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"             # Managed image from SIG
-  RESOURCE_GROUP: "ucorp-wvd2-rg"
+  RESOURCE_GROUP: "ucorp-wvd-rg"
   VAULT_NAME: "ucorp-wvd-kv"
   SECURITY_GROUP: "SG_WVD_Users"
   CUSTOMER_PREFIX: "Ucorp"
   
-
 jobs:
   build:
     name: 3-Create-WVD-Host-Pool
@@ -74,12 +73,12 @@ jobs:
             "customRdpProperty" = "audiocapturemode:i:1;camerastoredirect:s:*;"
             "vmResourceGroup" = $ResourceGroup;
             "vmLocation" = "westeurope";
-            "vmSize" = "Standard_D4s_v3";
+            "vmSize" = "Standard_D8s_v3";
             "vmNumberOfInstances" = $NumberOfInstances;
             "vmNamePrefix" = "$($CustomerPrefix)-WVD";
             "vmImageType" = "CustomImage";
             "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}";
-            "vmDiskType" = "StandardSSD_LRS";
+            "vmDiskType" = "Premium_LRS";
             "vmUseManagedDisks" = $true;
             "existingVnetName" = "Ucorp-vNet";
             "existingSubnetName" = "$($CustomerPrefix)-wvd-subnet";
@@ -90,7 +89,7 @@ jobs:
             "hostpoolType" = "Pooled";
             "maxSessionLimit" = 8;
             "loadBalancerType" = "DepthFirst";
-            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-wvd`",`"osDiskType`"`:`"StandardSSD_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard_D4s_v3`",`"cores`"`:4,`"ram`"`:16},`"galleryItemId`"`:null}";
+            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}`",`"namePrefix`":`"$($CustomerPrefix)-wvd`",`"osDiskType`"`:`"Premium_LRS`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"Standard_D8s_v3`",`"cores`"`:8,`"ram`"`:32},`"galleryItemId`"`:null}";
             "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
             "apiVersion" = "2019-12-10-preview";
             "administratorAccountUsername" = "$($domainAdminUser)";

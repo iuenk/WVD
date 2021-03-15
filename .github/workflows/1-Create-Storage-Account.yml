@@ -2,8 +2,8 @@ name: 1-Create-Storage-Account
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "ucorpwvdstorage2"
-  RESOURCE_GROUP: "ucorp-storage2-rg"
+  STORAGE_ACCOUNT: "ucorpwvdstorageprem"
+  RESOURCE_GROUP: "ucorp-storage-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
@@ -48,8 +48,8 @@ jobs:
           "allowSharedKeyAccess" = $true;
           "networkAclsBypass" = "AzureServices";
           "networkAclsDefaultAction" = "Allow";
-          "accountType" = "Standard_ZRS";
-          "kind" = "storageV2";
+          "accountType" = "Premium_LRS";
+          "kind" = "FileStorage";
           "isShareSoftDeleteEnabled" = $true;
           "shareSoftDeleteRetentionDays" = 90;
           }
@@ -68,13 +68,18 @@ jobs:
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
           # Create file shares fslogix and msixappattach
-          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
-          $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
+          # $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
+          #$ storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
 
-          $fslogix = "fslogixprofiles"
+          $fslogixO365 = "fslogixO365"
+          $fslogixProfiles = "fslogixProfiles"
           $msix = "msixappattach"
-          New-AzstorageShare -Name $fslogix -Context $storageContext
-          New-AzstorageShare -Name $msix -Context $storageContext
+          # New-AzstorageShare -Name $fslogix -Context $storageContext
+          # New-AzstorageShare -Name $msix -Context $storageContext
+
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroupName -StorageAccountName $storageAccountName -Name $fslogixO365 -AccessTier Premium -QuotaGiB 5
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroupName -StorageAccountName $storageAccountName -Name $fslogixProfiles -AccessTier Premium -QuotaGiB 10
+          New-AzRmStorageShare -ResourceGroupName $ResourceGroupName -StorageAccountName $storageAccountName -Name $msix -AccessTier TransactionOptimized -QuotaGiB 10
 
           # rechten nog zetten op de shares
           #$SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
