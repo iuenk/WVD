@@ -1,4 +1,4 @@
-name: 1-Create-Storage-Premium
+name: 1-Create-Storage-FSlogix
 on: workflow_dispatch
 
 env:
@@ -8,7 +8,7 @@ env:
 
 jobs:
   build:
-    name: 1-Create-Storage-Premium
+    name: 1-Create-Storage-FSlogix
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
