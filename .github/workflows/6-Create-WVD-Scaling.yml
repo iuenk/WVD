@@ -4,7 +4,6 @@ on: workflow_dispatch
 env:
   STORAGE_ACCOUNT: "ucorpwvdstd"
   RESOURCE_GROUP: "ucorp-wvd1-rg"
-  SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
   build:
@@ -26,9 +25,9 @@ jobs:
           # Read the environment variables in PowerShell
           [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
 
           $Tags = @{"Environment"="WVD Production"}
+          $FunctionFilePath = "https://github.com/iuenk/WVD/blob/main/PSScripts/run.ps1"
 
           # Create the resource group if needed
           try {
@@ -39,22 +38,18 @@ jobs:
 
           # Read the contents of the function file and assemble deployment parameters
           $functionFileContents = [System.IO.File]::ReadAllText($FunctionFilePath)
-          $templateParameters = @{}
+          $objTemplateParameter = @{
+            "functionsAppName" = "ucorpscaling";
+            "FunctionName" = "ucorpwvdscalingtimer";
+            "functionsStorageAccountName" = "ucorpwvdstd"
+            }
           $templateParameters.Add("functionFile", $functionFileContents)
 
-          ## Create a Template Parameter Object (hashtable)
-          $objTemplateParameter = @{
-          $FunctionFilePath = "";
-          $ArmTemplateFilePath = "";
-          $ResourceGroupName = "";
-          $ResourceGroupLocation = "";
-          }
-
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-Storage-Account.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\6-ARM-Create-WVD-Scaling.json")
               
           # storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Account.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/6-ARM-Create-WVD-Scaling.json"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
@@ -62,8 +57,5 @@ jobs:
           # ARM Template file
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
-
-          # deploy it
-          New-AzResourceGroupDeployment -ResourceGroupName  AzUnzipEverything -TemplateFile deployment\deployAzure.json
 
         azPSVersion: 'latest'
