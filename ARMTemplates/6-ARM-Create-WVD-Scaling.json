@@ -27,6 +27,12 @@
                 "description": "The name of the function wihtin the function app."
             }
         },
+        "functionsAppServicePlanName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the function application plan."
+            }
+        },
         "functionSchedule": {
             "type": "string",
             "metadata": {
@@ -55,8 +61,8 @@
         }
     },
     "variables": {        
-        "functionsAppServicePlanName": "FunctionAppServicePlan",
-        "functionsAppName": "[concat('fn', parameters('functionsAppName'))]",
+        "functionsAppServicePlanName": "[parameters('functionsAppServicePlanName')]",
+        "functionsAppName": "[parameters('functionsAppName'))]",
         "functionName": "[parameters('FunctionName')]",
         "functionFile": "[parameters('functionFile')]",
         "functionSchedule": "[parameters('functionSchedule')]",
@@ -65,29 +71,6 @@
         "applicationInsightsName": "FunctionAppInsights"
     },
     "resources": [
-        {
-            "name": "[variables('functionsStorageAccountName')]",
-            "type": "Microsoft.Storage/storageAccounts",
-            "location": "[resourceGroup().location]",
-            "apiVersion": "2018-02-01",
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "kind": "StorageV2",
-            "properties": {
-                "accessTier": "Hot",
-                "supportsHttpsTrafficOnly": true,
-                "encryption": {
-                    "services": {
-                        "blob": {
-                            "enabled": true
-                        }
-                    },
-                    "keySource": "Microsoft.Storage"
-                }
-            }
-        },
-
         {
             "name": "[variables('functionsAppServicePlanName')]",
             "type": "Microsoft.Web/serverfarms",
@@ -117,6 +100,9 @@
             "location": "[resourceGroup().location]",
             "apiVersion": "2016-08-01",
             "kind": "functionapp",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "enabled": true,
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionsAppServicePlanName'))]",
