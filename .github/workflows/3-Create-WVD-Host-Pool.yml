@@ -2,13 +2,11 @@ name: 3-Create-WVD-Host-Pool
 on: workflow_dispatch
 
 env:
-  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Pool"     # WVD Hostpool name
   AZURE_NUMBER_OF_INSTANCES: 1              # Number of instances to add to the WVD Hostpool
   SIG: "ucorpwvdsig"                        # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"     # Managed image from SIG
   RESOURCE_GROUP: "ucorp-wvd1-rg"
   VAULT_NAME: "ucorp-wvd-kv"
-  SECURITY_GROUP: "SG_WVD_Users"
   VMSIZE: "Standard_D4s_v3"                 # Standard_D8s_v3
   VMDISKTYPE: "Standard_LRS"                # Premium_LRS
   CUSTOMER_PREFIX: "Ucorp"
@@ -31,10 +29,8 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
           [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
           [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
-          [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
           [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$VMSize = [System.Environment]::GetEnvironmentVariable('VMSIZE')
@@ -43,6 +39,8 @@ jobs:
           [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
 
           $Tags = @{"Environment"="WVD Production"}
+          $HostPoolName = "Ucorp-WVD-Pool"
+          $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
           $Ram = "16"
           $VNetName = "Ucorp-vNet"
@@ -131,6 +129,7 @@ jobs:
           Update-AzWvdWorkspace -ResourceGroupName $ResourceGroup -Name "$CustomerPrefix-wvd-Workspace" -ApplicationGroupReference $ApplicationGroupReference
 
           #Add AD group to new created Groups
+          Start-Sleep -s 60
           $SecurityGroupId = Get-AZADGroup | Where-Object {$_.MailNickname -eq $SecurityGroup} | Select-Object -ExpandProperty Id
           New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-DAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
           New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-RAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'

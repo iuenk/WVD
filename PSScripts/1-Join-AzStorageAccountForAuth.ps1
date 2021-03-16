@@ -4,7 +4,7 @@ $SubscriptionId = "438eedbe-4df3-42b6-9bd2-5b7f8a069f4b"
 $ResourceGroup = "ucorp-storage-rg"
 $StorageAccountStd = "ucorpwvdstd"
 $StorageAccountPrem = "ucorpwvdprem"
-$OU = "OU=Ucorp,DC=ucorp,DC=local"
+$OU = "OU=Servers,OU=Ucorp,DC=ucorp,DC=local"
 $SecurityGroup = "SG_WVD_Users"
 $ServicePrincipalName = "githubactionazure"
 $servicePrincipalApplicationID = (Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id)
