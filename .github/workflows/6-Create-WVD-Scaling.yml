@@ -27,7 +27,10 @@ jobs:
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
 
           $Tags = @{"Environment"="WVD Production"}
-          $FunctionFilePath = "https://github.com/iuenk/WVD/blob/main/PSScripts/run.ps1"
+          $ResourceGroup = "ucorp-wvd1-rg"
+          $functionsAppName = "ucorpscaling"
+          $storageAccountName = "ucorpwvdstd"
+          $FunctionFilePath = "C:\AzFilesHybrid\run.ps1"
 
           # Create the resource group if needed
           try {
@@ -36,14 +39,23 @@ jobs:
               New-AzResourceGroup -Name $ResourceGroup -Location "westeurope" -Tag $Tags
           }
 
+          # Temp location for the run.ps1 (discarded when runbook is finished)
+          $FunctionFilePath = [string]($env:TEMP + "\run.ps1")
+              
+          # Script location on github
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/6-ARM-Create-WVD-Scaling.json"
+
+          # Retrieve the template file and save it in a temp file location
+          Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
+
           # Read the contents of the function file and assemble deployment parameters
           $functionFileContents = [System.IO.File]::ReadAllText($FunctionFilePath)
           $objTemplateParameter = @{
-            "functionsAppName" = "ucorpscaling";
+            "functionsAppName" = $functionsAppName;
             "FunctionName" = "ucorpwvdscalingtimer";
             "functionSchedule" = "0 */5 * * * *";
-            "functionsStorageAccountName" = "ucorpwvdstd"
-            "functionsAppServicePlanName" = "ucorp-wvd-scaling-asp"
+            "functionsStorageAccountName" = $storageAccountName;
+            "functionsAppServicePlanName" = "ucorpwvdscalingasp";
             }
           $objTemplateParameter.Add("functionFile", $functionFileContents)
 
@@ -59,7 +71,9 @@ jobs:
           # ARM Template file
           ## Create WVD scaling function app
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
-          
-          
 
+          # Give function app contributor rights on the WVD resource group
+          $functionsAppNameId = Get-AzADServicePrincipal | Where-Object {$_.DisplayName -eq $functionsAppName} | Select-Object -ExpandProperty Id
+          New-AzRoleAssignment -ObjectId $functionsAppNameId -RoleDefinitionName "Contributor" -ResourceGroupName $ResourceGroup
+          
         azPSVersion: 'latest'
