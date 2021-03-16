@@ -56,10 +56,10 @@ jobs:
           }
 
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-Storage-Premium.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\1-ARM-Create-Storage-Account.json")
               
           # storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Premium.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/1-ARM-Create-Storage-Account.json"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
