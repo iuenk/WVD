@@ -57,7 +57,7 @@ jobs:
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
 
           # ARM Template file
-          ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
+          ## Create WVD scaling function app
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
           
           
