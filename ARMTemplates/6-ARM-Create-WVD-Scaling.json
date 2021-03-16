@@ -74,7 +74,7 @@
         "functionSchedule": "[parameters('functionSchedule')]",
         "functionsStorageAccountName": "[parameters('functionsStorageAccountName')]",
         "storageAccountResourceGroup": "[parameters('storageAccountResourceGroup')]",
-        "functionsStorageAccountResourceId": "[resourceId('variables('functionsStorageAccountName')','Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
+        "functionsStorageAccountResourceId": "[resourceId(variables('storageAccountResourceGroup'),'Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
         "applicationInsightsName": "FunctionAppInsights"
     },
     "resources": [
