@@ -30,7 +30,7 @@ jobs:
           $ResourceGroup = "ucorp-wvd1-rg"
           $functionsAppName = "ucorpscaling"
           $storageAccountName = "ucorpwvdstd"
-          $FunctionFilePath = "C:\AzFilesHybrid\run.ps1"
+          $storageAccountResourceGroup = "ucorp-storage-rg"
 
           # Create the resource group if needed
           try {

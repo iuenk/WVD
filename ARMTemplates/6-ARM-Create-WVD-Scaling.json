@@ -45,6 +45,12 @@
                 "description": "The storage account to put the function app in."
             }
         },
+        "storageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "The storage account resource group."
+            }
+        },
         "applicationInsightsLocation": {
             "type": "string",
             "defaultValue": "westeurope",
@@ -67,7 +73,8 @@
         "functionFile": "[parameters('functionFile')]",
         "functionSchedule": "[parameters('functionSchedule')]",
         "functionsStorageAccountName": "[parameters('functionsStorageAccountName')]",
-        "functionsStorageAccountResourceId": "[resourceId('ucorp-storage-rg','Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
+        "storageAccountResourceGroup": "[parameters('storageAccountResourceGroup')]",
+        "functionsStorageAccountResourceId": "[resourceId('variables('functionsStorageAccountName')','Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
         "applicationInsightsName": "FunctionAppInsights"
     },
     "resources": [
