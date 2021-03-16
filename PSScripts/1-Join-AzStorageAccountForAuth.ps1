@@ -2,8 +2,10 @@
 $TenantId = "a2de9bda-ffed-4527-96d7-d6f3ac10da8c"
 $SubscriptionId = "438eedbe-4df3-42b6-9bd2-5b7f8a069f4b"
 $ResourceGroup = "ucorp-storage-rg"
-$StorageAccountStd = "wvdstoragestd"
-$StorageAccountPrem = "wvdstorageprem"
+$StorageAccountStd = "ucorpwvdstd"
+$StorageAccountPrem = "ucorpwvdprem"
+$OU = "OU=Ucorp,DC=ucorp,DC=local"
+$SecurityGroup = "SG_WVD_Users"
 $ServicePrincipalName = "githubactionazure"
 $servicePrincipalApplicationID = (Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id)
 $servicePrincipalPassword = "accesskey"
@@ -38,8 +40,8 @@ Connect-AzAccount -ServicePrincipal -Credential $ServicePrincipalCreds  -Tenant 
 Select-AzSubscription -SubscriptionId $SubscriptionId 
 
 # Register the target storage account with your active directory environment under the target OU (for example: specify the OU with Name as "UserAccounts" or DistinguishedName as "OU=UserAccounts,DC=CONTOSO,DC=COM").
-Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountStd -DomainAccountType "ComputerAccount"
-Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountPrem -DomainAccountType "ComputerAccount"
+Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountStd -DomainAccountType "ComputerAccount" -OrganizationalUnitDistinguishedName $OU
+Join-AzStorageAccountForAuth -ResourceGroupName $ResourceGroup -StorageAccountName $StorageAccountPrem -DomainAccountType "ComputerAccount" -OrganizationalUnitDistinguishedName $OU
 
 $fslogixOffice = "fslogixoffice"
 $fslogixProfiles = "fslogixprofiles"
@@ -47,9 +49,9 @@ $Msix = "msixappattach"
 
 # rechten nog zetten op de shares
 $SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
-$fslogixOfficeId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogixOffice"
-$fslogixProfilesId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$fslogixProfiles"
-$MsixId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$storageAccountName/fileServices/default/fileshares/$Msix"
+$fslogixOfficeId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$StorageAccountPrem/fileServices/default/fileshares/$fslogixOffice"
+$fslogixProfilesId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$StorageAccountPrem/fileServices/default/fileshares/$fslogixProfiles"
+$MsixId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$StorageAccountStd/fileServices/default/fileshares/$Msix"
 
 # To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
 New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixOfficeId
