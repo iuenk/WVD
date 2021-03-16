@@ -67,7 +67,7 @@
         "functionFile": "[parameters('functionFile')]",
         "functionSchedule": "[parameters('functionSchedule')]",
         "functionsStorageAccountName": "[parameters('functionsStorageAccountName')]",
-        "functionsStorageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
+        "functionsStorageAccountResourceId": "[resourceId('ucorp-storage-rg','Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
         "applicationInsightsName": "FunctionAppInsights"
     },
     "resources": [

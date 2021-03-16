@@ -40,13 +40,13 @@ jobs:
           }
 
           # Temp location for the run.ps1 (discarded when runbook is finished)
-          $FunctionFilePath = [string]($env:TEMP + "\run.ps1")
+          $FunctionFilePath = [string]($env:TEMP + "\6-Ucorp-WVD-Scaling.ps1")
               
           # Script location on github
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/6-ARM-Create-WVD-Scaling.json"
+          $ScriptUrl="https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/6-Ucorp-WVD-Scaling.ps1"
 
           # Retrieve the template file and save it in a temp file location
-          Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
+          Invoke-WebRequest -Uri $ScriptUrl -OutFile $FunctionFilePath -UseBasicParsing
 
           # Read the contents of the function file and assemble deployment parameters
           $functionFileContents = [System.IO.File]::ReadAllText($FunctionFilePath)
