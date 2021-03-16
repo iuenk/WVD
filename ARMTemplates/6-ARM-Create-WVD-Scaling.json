@@ -62,7 +62,7 @@
     },
     "variables": {        
         "functionsAppServicePlanName": "[parameters('functionsAppServicePlanName')]",
-        "functionsAppName": "[parameters('functionsAppName'))]",
+        "functionsAppName": "[parameters('functionsAppName')]",
         "functionName": "[parameters('FunctionName')]",
         "functionFile": "[parameters('functionFile')]",
         "functionSchedule": "[parameters('functionSchedule')]",
