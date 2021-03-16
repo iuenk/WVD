@@ -15,6 +15,30 @@
                 "description": "The contents of the function's `run.ps1` file."
             }
         },
+        "functionsAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "The function app name."
+            }
+        },
+        "FunctionName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the function wihtin the function app."
+            }
+        },
+        "functionSchedule": {
+            "type": "array",
+            "metadata": {
+                "description": "Schedule when to trigger the function."
+            }
+        },
+        "functionsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "The storage account to put the function app in."
+            }
+        },
         "applicationInsightsLocation": {
             "type": "string",
             "defaultValue": "westeurope",
