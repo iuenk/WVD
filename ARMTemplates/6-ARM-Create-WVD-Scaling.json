@@ -28,7 +28,7 @@
             }
         },
         "functionSchedule": {
-            "type": "array",
+            "type": "string",
             "metadata": {
                 "description": "Schedule when to trigger the function."
             }
