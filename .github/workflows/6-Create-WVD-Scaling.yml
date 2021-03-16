@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 env:
   STORAGE_ACCOUNT: "ucorpwvdstd"
-  RESOURCE_GROUP: "ucorp-storage-rg"
+  RESOURCE_GROUP: "ucorp-wvd1-rg"
   SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
@@ -24,12 +24,27 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          # BEWARE $StorageAccountName cannot be longer than 15 characters
           [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
           [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
 
           $Tags = @{"Environment"="WVD Production"}
+          $FunctionFilePath,
+          $ArmTemplateFilePath,
+          $ResourceGroupName,
+          $ResourceGroupLocation
+
+          # Create the resource group if needed
+          try {
+              Get-AzResourceGroup -Name $ResourceGroup -ErrorAction Stop
+          } catch {
+              New-AzResourceGroup -Name $ResourceGroup -Location "westeurope" -Tag $Tags
+          }
+
+          # Read the contents of the function file and assemble deployment parameters
+          $functionFileContents = [System.IO.File]::ReadAllText($FunctionFilePath)
+          $templateParameters = @{}
+          $templateParameters.Add("functionFile", $functionFileContents)
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
@@ -61,11 +76,7 @@ jobs:
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
-          # Create file shares fslogix and msixappattach
-          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
-          $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
-
-          $msix = "msixappattach"
-          New-AzstorageShare -Name $msix -Context $storageContext
+          # deploy it
+          New-AzResourceGroupDeployment -ResourceGroupName  AzUnzipEverything -TemplateFile deployment\deployAzure.json
 
         azPSVersion: 'latest'
