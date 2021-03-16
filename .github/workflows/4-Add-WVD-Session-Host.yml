@@ -2,7 +2,7 @@ name: 4-Add-WVD-Session-Host
 on: workflow_dispatch
 
 env:
-  AZURE_HOSTPOOL_NAME: "ucorp-wvd-hostpool"     # set this to the WVD Hostpool name to add the instances
+  AZURE_HOSTPOOL_NAME: "Ucorp-WVD-Pool"     # set this to the WVD Hostpool name to add the instances
   AZURE_NUMBER_OF_INSTANCES: 1                  # set this to the number of instances to add to the WVD Hostpool
   SIG: "ucorpwvdsig"                            # SIG Name
   SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"         # Managed image from SIG
