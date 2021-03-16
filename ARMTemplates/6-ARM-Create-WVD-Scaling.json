@@ -12,7 +12,7 @@
         "functionFile": {
             "type": "string",
             "metadata": {
-                "description": "The contents of the function's `run.csx` file."
+                "description": "The contents of the function's `run.ps1` file."
             }
         },
         "applicationInsightsLocation": {
@@ -21,7 +21,6 @@
             "allowedValues": [
                 "eastus",
                 "southcentralus",
-                "westeurope",
                 "northeurope",
                 "westeurope",
                 "southeastasia"
@@ -33,12 +32,12 @@
     },
     "variables": {        
         "functionsAppServicePlanName": "FunctionAppServicePlan",
-        "functionsAppName": "[concat('fn', parameters('uniqueResourceNameSuffix'))]",
-        "functionName": "MyFunction",
-
-        "functionsStorageAccountName": "[variables('functionsAppName')]",
+        "functionsAppName": "[concat('fn', parameters('functionsAppName'))]",
+        "functionName": "[parameters('FunctionName')]",
+        "functionFile": "[parameters('functionFile')]",
+        "functionSchedule": "[parameters('functionSchedule')]",
+        "functionsStorageAccountName": "[parameters('functionsStorageAccountName')]",
         "functionsStorageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
-
         "applicationInsightsName": "FunctionAppInsights"
     },
     "resources": [
@@ -111,18 +110,16 @@
                         "config": {
                             "bindings": [
                                 {
-                                    "type": "httpTrigger",
+                                    "name": "myTimer",
+                                    "type": "timerTrigger",
                                     "direction": "in",
-                                    "name": "req",
-                                    "methods": [
-                                      "get"
-                                    ]
+                                    "schedule": "[variables('functionSchedule')]"
                                   }
                             ],
                             "disabled": false
                         },
                         "files": {
-                            "run.csx": "[parameters('functionFile')]"
+                            "run.ps1": "[variables('functionFile')]"
                         }
                     },
                     "dependsOn": [

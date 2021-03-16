@@ -29,10 +29,6 @@ jobs:
           [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
 
           $Tags = @{"Environment"="WVD Production"}
-          $FunctionFilePath,
-          $ArmTemplateFilePath,
-          $ResourceGroupName,
-          $ResourceGroupLocation
 
           # Create the resource group if needed
           try {
@@ -48,19 +44,10 @@ jobs:
 
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
-          "storageAccountName" = "$storageAccountName";
-          "location" = "westeurope";
-          "accessTier" = "Hot";
-          "minimumTlsVersion" = "TLS1_2";
-          "supportsHttpsTrafficOnly" = $true;
-          "allowBlobPublicAccess" = $false;
-          "allowSharedKeyAccess" = $true;
-          "networkAclsBypass" = "AzureServices";
-          "networkAclsDefaultAction" = "Allow";
-          "accountType" = "Standard_LRS";
-          "kind" = "StorageV2";
-          "isShareSoftDeleteEnabled" = $true;
-          "shareSoftDeleteRetentionDays" = 90;
+          $FunctionFilePath = "";
+          $ArmTemplateFilePath = "";
+          $ResourceGroupName = "";
+          $ResourceGroupLocation = "";
           }
 
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
