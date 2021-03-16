@@ -4,7 +4,7 @@ on: workflow_dispatch
 env:
   RESOURCE_GROUP: "ucorp-logging-rg"
   STORAGE_ACCOUNT_GROUP: "ucorp-storage-rg"
-  STORAGE_ACCOUNT_NAME: "ucorpwvdstorageprem"
+  STORAGE_ACCOUNT_NAME: "ucorpwvdstd"
 
 jobs:
   build:
