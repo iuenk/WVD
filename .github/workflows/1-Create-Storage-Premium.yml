@@ -49,8 +49,10 @@ jobs:
           "allowSharedKeyAccess" = $true;
           "networkAclsBypass" = "AzureServices";
           "networkAclsDefaultAction" = "Allow";
-          "accountType" = "Premium_LRS";
-          "kind" = "FileStorage";
+          #"accountType" = "Premium_LRS";
+          "accountType" = "Standard_LRS";
+          #"kind" = "FileStorage";
+          "kind" = "StorageV2";
           "isShareSoftDeleteEnabled" = $true;
           "shareSoftDeleteRetentionDays" = 90;
           }
@@ -68,10 +70,16 @@ jobs:
           ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
 
+          # Create file shares fslogix and msixappattach
+          $storageKey = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $storageAccountName).Value[0]
+          $storageContext = New-AzstorageContext -storageAccountName $storageAccountName -storageAccountKey $storageKey
+
           $fslogixOffice = "fslogixoffice"
           $fslogixProfiles = "fslogixprofiles"
+          New-AzstorageShare -Name $fslogixOffice -Context $storageContext
+          New-AzstorageShare -Name $fslogixProfiles -Context $storageContext
 
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixOffice -QuotaGiB 100
-          New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixProfiles -QuotaGiB 100
+          # New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixOffice -QuotaGiB 100
+          # New-AzRmStorageShare -ResourceGroupName $ResourceGroup -StorageAccountName $storageAccountName -Name $fslogixProfiles -QuotaGiB 100
 
         azPSVersion: 'latest'
