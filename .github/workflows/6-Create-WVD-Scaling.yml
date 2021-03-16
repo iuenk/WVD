@@ -55,6 +55,7 @@ jobs:
             "FunctionName" = "ucorpwvdscalingtimer";
             "functionSchedule" = "0 */5 * * * *";
             "functionsStorageAccountName" = $storageAccountName;
+            "storageAccountResourceGroup" = $storageAccountResourceGroup;
             "functionsAppServicePlanName" = "ucorpwvdscalingasp";
             }
           $objTemplateParameter.Add("functionFile", $functionFileContents)
