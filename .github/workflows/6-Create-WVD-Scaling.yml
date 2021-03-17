@@ -2,8 +2,6 @@ name: 6-Create-WVD-Scaling
 on: workflow_dispatch
 
 env:
-  STORAGE_ACCOUNT: "ucorpwvdstd"
-  RESOURCE_GROUP: "ucorp-wvd1-rg"
 
 jobs:
   build:
@@ -23,9 +21,6 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
-          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-
           $Tags = @{"Environment"="WVD Production"}
           $ResourceGroup = "ucorp-wvd1-rg"
           $functionsAppName = "ucorpscaling"

@@ -25,11 +25,14 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$ServicePrincipalName = [System.Environment]::GetEnvironmentVariable('SERVICE_PRINCIPAL_NAME')
-          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
+          #[string]$ServicePrincipalName = [System.Environment]::GetEnvironmentVariable('SERVICE_PRINCIPAL_NAME')
+          #[string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
+          #[string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
 
           $Tags = @{"Environment"="WVD Production"}
+          $ServicePrincipalName = "githubactionazure"
+          $VaultName = "ucorp-vault-rg"
+          $ResourceGroup = "ucorp-wvd-kv"
 
           # Create the resource group if needed
           try {
