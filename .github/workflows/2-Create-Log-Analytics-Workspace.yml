@@ -22,8 +22,8 @@ jobs:
           $Tags = @{"Environment"="WVD Production"}
           $CustomerPrefix = "Ucorp"
           $ResourceGroup = "$CustomerPrefix-Logging-RG"
-          $StorageAccoutResourceGroup "$CustomerPrefix-Storage-RG"
-          $StorageAccountName "ucorpwvdstd"
+          $StorageAccoutResourceGroup = "$CustomerPrefix-Storage-RG"
+          $StorageAccountName = "ucorpwvdstd"
           $WorkspaceName = "$CustomerPrefix-WVD-LAW"
 
           # Create the resource group if needed
