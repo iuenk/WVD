@@ -1,16 +1,6 @@
 name: 3-Create-WVD-Host-Pool
 on: workflow_dispatch
 
-env:
-  AZURE_NUMBER_OF_INSTANCES: 1              # Number of instances to add to the WVD Hostpool
-  SIG: "ucorpwvdsig"                        # SIG Name
-  SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"     # Managed image from SIG
-  RESOURCE_GROUP: "ucorp-wvd1-rg"
-  VAULT_NAME: "ucorp-wvd-kv"
-  VMSIZE: "Standard_D4s_v3"                 # Standard_D8s_v3
-  VMDISKTYPE: "Standard_LRS"                # Premium_LRS
-  CUSTOMER_PREFIX: "Ucorp"
-  
 jobs:
   build:
     name: 3-Create-WVD-Host-Pool
@@ -29,23 +19,22 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
-          [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
-          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
-          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$VMSize = [System.Environment]::GetEnvironmentVariable('VMSIZE')
-          [string]$VMDiskType = [System.Environment]::GetEnvironmentVariable('VMDISKTYPE')
-          [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
-          [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
-
           $Tags = @{"Environment"="WVD Production"}
-          $HostPoolName = "Ucorp-WVD-Pool"
+          $CustomerPrefix = "Ucorp"
+          $ResourceGroup = "$CustomerPrefix-WVD-RG"
+          $Sig = "ucorpwvdsig" 
+          $SigImageDefName = "$CustomerPrefix-WVD-Image"
+          $VMSize = "Standard_D4s_v3" # Standard_D8s_v3
+          $VMDiskType = "StandardSDD_LRS" # Premium_LRS
+          $VaultName = "$CustomerPrefix-WVD-KV"
+          $HostPoolName = "$CustomerPrefix-WVD-Pool"
+          $NumberOfInstances = 2
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
           $Ram = "16"
-          $VNetName = "Ucorp-vNet"
-          $SubnetName = "ucorp-wvd-subnet"
-          $VNetResourceGroup = "ucorp-network-rg"
+          $VNetName = "$CustomerPrefix-vNet"
+          $SubnetName = "$CustomerPrefix-WVD-Subnet"
+          $VNetResourceGroup = "$CustomerPrefix-Network-RG"
 
           # Retrieve sensitive information from KeyVault
           $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminpassword).SecretValue
@@ -127,11 +116,5 @@ jobs:
 
           $ApplicationGroupReference = "$ResourceIDDesktopGroup","$ResourceIDRemoteAppGroup"
           Update-AzWvdWorkspace -ResourceGroupName $ResourceGroup -Name "$CustomerPrefix-wvd-Workspace" -ApplicationGroupReference $ApplicationGroupReference
-
-          #Add AD group to new created Groups
-          Start-Sleep -s 60
-          $SecurityGroupId = Get-AZADGroup | Where-Object {$_.MailNickname -eq $SecurityGroup} | Select-Object -ExpandProperty Id
-          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-DAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
-          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-RAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
 
         azPSVersion: 'latest'
