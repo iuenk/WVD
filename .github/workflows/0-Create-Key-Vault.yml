@@ -4,8 +4,8 @@ on: workflow_dispatch
 
 env:
   SERVICE_PRINCIPAL_NAME: "githubactionazure"
-  RESOURCE_GROUP: "ucorp-vault-rg"
-  VAULT_NAME: "ucorp-wvd-kv"
+  RESOURCE_GROUP: "Ucorp-Vault-RG"
+  VAULT_NAME: "Ucorp-WVD-KV"
 
 jobs:
   build:
@@ -30,9 +30,6 @@ jobs:
           #[string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
 
           $Tags = @{"Environment"="WVD Production"}
-          $ServicePrincipalName = "githubactionazure"
-          $VaultName = "ucorp-vault-rg"
-          $ResourceGroup = "ucorp-wvd-kv"
 
           # Create the resource group if needed
           try {
