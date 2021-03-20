@@ -2,11 +2,6 @@
 name: 0-Create-Key-Vault
 on: workflow_dispatch
 
-env:
-  SERVICE_PRINCIPAL_NAME: "githubactionazure"
-  RESOURCE_GROUP: "Ucorp-Vault-RG"
-  VAULT_NAME: "Ucorp-WVD-KV"
-
 jobs:
   build:
     name: 0-Create-Key-Vault
@@ -25,11 +20,10 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          #[string]$ServicePrincipalName = [System.Environment]::GetEnvironmentVariable('SERVICE_PRINCIPAL_NAME')
-          #[string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          #[string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
-
           $Tags = @{"Environment"="WVD Production"}
+          $ServicePrincipalName = "githubactionazure"
+          $ResourceGroup = "Ucorp-Vault-RG"
+          $VaultName = "Ucorp-WVD-KV"
 
           # Create the resource group if needed
           try {
