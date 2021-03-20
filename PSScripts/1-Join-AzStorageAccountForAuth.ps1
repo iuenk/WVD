@@ -5,7 +5,8 @@ $ResourceGroup = "ucorp-storage-rg"
 $StorageAccountStd = "ucorpwvdstd"
 $StorageAccountPrem = "ucorpwvdprem"
 $OU = "OU=Servers,OU=Ucorp,DC=ucorp,DC=local"
-$SecurityGroup = "SG_WVD_Users"
+$SecurityGroupUsers = "SG_WVD_Users"
+$SecurityGroupAdmins = "SG_WVD_Admins"
 $ServicePrincipalName = "githubactionazure"
 $servicePrincipalApplicationID = (Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id)
 $servicePrincipalPassword = "accesskey"
@@ -48,12 +49,18 @@ $fslogixProfiles = "fslogixprofiles"
 $Msix = "msixappattach"
 
 # rechten nog zetten op de shares
-$SecurityGroupID = (Get-AzADGroup -DisplayName $SecurityGroup).id
+$SecurityGroupIDUsers = (Get-AzADGroup -DisplayName $SecurityGroupUsers).id
+$SecurityGroupIDAdmins = (Get-AzADGroup -DisplayName $SecurityGroupAdmins).id
 $fslogixOfficeId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$StorageAccountPrem/fileServices/default/fileshares/$fslogixOffice"
 $fslogixProfilesId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$StorageAccountPrem/fileServices/default/fileshares/$fslogixProfiles"
 $MsixId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.storage/storageAccounts/$StorageAccountStd/fileServices/default/fileshares/$Msix"
 
-# To give individual accounts access to the file share (Kerberos), enable identity-based authentication for the storage account
-New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixOfficeId
-New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixProfilesId
-New-AzRoleAssignment -ObjectID $SecurityGroupID -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixId
+# To give WVD users to the file share (Kerberos), enable identity-based authentication for the storage account
+New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixOfficeId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $fslogixProfilesId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixId
+
+# To give WVD admins to the file share (Kerberos), enable identity-based authentication for the storage account
+New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $fslogixOfficeId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $fslogixProfilesId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $MsixId
