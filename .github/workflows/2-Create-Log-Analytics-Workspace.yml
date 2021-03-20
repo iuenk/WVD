@@ -1,11 +1,6 @@
 name: 2-Create-Log-Analytics-Workspace
 on: workflow_dispatch
 
-env:
-  RESOURCE_GROUP: "ucorp-logging-rg"
-  STORAGE_ACCOUNT_GROUP: "ucorp-storage-rg"
-  STORAGE_ACCOUNT_NAME: "ucorpwvdstd"
-
 jobs:
   build:
     name: 2-Create-Log-Analytics-Workspace
@@ -24,12 +19,12 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$StorageAccoutResourceGroup = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT_GROUP')
-          [string]$StorageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT_NAME')
-
           $Tags = @{"Environment"="WVD Production"}
-          $WorkspaceName = "ucorp-wvdlog-law"
+          $CustomerPrefix = "Ucorp"
+          $ResourceGroup = "$CustomerPrefix-Logging-RG"
+          $StorageAccoutResourceGroup "$CustomerPrefix-Storage-RG"
+          $StorageAccountName "ucorpwvdstd"
+          $WorkspaceName = "$CustomerPrefix-WVD-LAW"
 
           # Create the resource group if needed
           try {
