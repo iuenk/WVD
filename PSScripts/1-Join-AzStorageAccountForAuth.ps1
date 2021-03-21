@@ -4,7 +4,7 @@ $SubscriptionId = "438eedbe-4df3-42b6-9bd2-5b7f8a069f4b"
 $ResourceGroup = "ucorp-storage-rg"
 $StorageAccountStd = "ucorpwvdstd"
 $StorageAccountPrem = "ucorpwvdprem"
-$OU = "OU=Servers,OU=Ucorp,DC=ucorp,DC=local"
+$OU = "OU=WVD,OU=Ucorp,DC=ucorp,DC=local"
 $SecurityGroupUsers = "SG_WVD_Users"
 $SecurityGroupAdmins = "SG_WVD_Admins"
 $ServicePrincipalName = "githubactionazure"
@@ -61,6 +61,30 @@ New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "storag
 New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "storage File Data SMB Share Contributor" -Scope $MsixId
 
 # To give WVD admins to the file share (Kerberos), enable identity-based authentication for the storage account
-New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $fslogixOfficeId
-New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $fslogixProfilesId
-New-AzRoleAssignment -ObjectID $SecurityGroupIDUsers -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $MsixId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDAdmins -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $fslogixOfficeId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDAdmins -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $fslogixProfilesId
+New-AzRoleAssignment -ObjectID $SecurityGroupIDAdmins -RoleDefinitionName "Storage File Data SMB Share Elevated Contributor" -Scope $MsixId
+
+#Mount storage accounts as shares to set NTFS rights
+$storageKeyStd = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $StorageAccountStd).Value[0]
+$storageKeyPrem = (Get-AzstorageAccountKey -ResourceGroupName $ResourceGroup -Name $StorageAccountPrem).Value[0]
+
+Invoke-Expression -Command "cmdkey /add:$StorageAccountStd.file.core.windows.net /user:AZURE\$StorageAccountStd /pass:$storageKeyStd"
+Invoke-Expression -Command "cmdkey /add:$StorageAccountPrem.file.core.windows.net /user:AZURE\$StorageAccountPrem /pass:$storageKeyPrem"
+
+#From here adjust the NTFS rights manually
+#$storageKeyStd
+#$storageKeyPrem
+#New-PSDrive -Name M -PSProvider FileSystem -Root "\\ucorpwvdstd.file.core.windows.net\msixappattach"
+#New-PSDrive -Name F -PSProvider FileSystem -Root "\\ucorpwvdprem.file.core.windows.net\fslogixprofiles"
+#New-PSDrive -Name P -PSProvider FileSystem -Root "\\ucorpwvdprem.file.core.windows.net\fslogixoffice"
+
+#msixappattach
+#SYSTEM (full control)
+#SG_WVD_Admins (Full control)
+#Domain Admins (Full control)
+
+#fslogixprofiles
+#Domain Admins (Full control)
+#SG_WVD_Admins (Full control)
+#SG_WVD_Users (Modify, this folder only)
