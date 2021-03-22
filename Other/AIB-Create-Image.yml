@@ -6,9 +6,7 @@ on: workflow_dispatch
 
 env:
   AIB_IMAGE_VERSION: 0.1.${{GITHUB.RUN_NUMBER}}     # Using the workflow run number for versioning
-  SIG_IMAGE_DEF_NAME: Ucorp-WVD-Image                # image definition name in the Shared Image Gallery
-  SIG: ucorpwvdsig
-  RESOURCEGROUP: Ucorp-WVD-RG
+  SIG_IMAGE_DEF_NAME: win10-evd-20h2                # image definition name in the Shared Image Gallery
 
 jobs:
   build:
@@ -32,7 +30,7 @@ jobs:
       uses: azure/build-vm-image@v0
       with:
         location: 'westeurope'
-        resource-group-name: 'Ucorp-WVD-RG'
+        resource-group-name: 'rg-wvd-images'
         managed-identity: ${{secrets.AZURE_AIB_IDENTITY}}
         source-os-type: 'windows'
         source-image-type: 'platformImage'
@@ -41,6 +39,6 @@ jobs:
         customizer-script: |
           & 'C:\AIBCustomizations\Customize-WVDImage.ps1'
         dist-type: 'SharedImageGallery'
-        dist-resource-id: '/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/${{env.RESOURCEGROUP}}/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}/versions/${{env.AIB_IMAGE_VERSION}}'
+        dist-resource-id: '/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/rg-wvd-images/providers/Microsoft.Compute/galleries/sigWVDImages/images/${{env.SIG_IMAGE_DEF_NAME}}/versions/${{env.AIB_IMAGE_VERSION}}'
         dist-location: 'westeurope'
 

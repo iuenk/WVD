@@ -4,38 +4,105 @@
 .DESCRIPTION
     Customization script for Azure Image Builder
 .NOTES
-    Author: Esther Barthel, MSc
+    Author: Ivo Uenk
     Version: 0.1
-    Created: 2020-11-26
-    Updated: 2020-11-26 - 
 
     Research Links: 
 #>
 
-# Create Temporary Installation folder (for downloaded resources)
-New-Item -Path 'C:\Install' -ItemType Directory -Force | Out-Null
+## Create Temporary Installation folder (for downloaded resources)
+$path ="c:\Install"
+mkdir $path -Force
 
-# Install Notepad++
-Invoke-WebRequest -Uri 'https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.1/npp.7.9.1.Installer.exe' -OutFile 'c:\Install\npp.7.9.1.Installer.exe'
-Invoke-Expression -Command 'C:\Install\npp.7.9.1.Installer.exe /S'
+$CustomerPrefix = "Ucorp"
+$TenantGUID = (get-aztenant).Id
 
-# Wait for Notepad++ installer to finish
-Start-Sleep -Seconds 10
 
-# Install Acrobat Reader DC
-Invoke-WebRequest -Uri 'ftp://ftp.adobe.com/pub/adobe/reader/win/AcrobatDC/2001320064/AcroRdrDC2001320064_en_US.exe' -OutFile 'c:\Install\AcroRdrDC2001320064_en_US.exe'
-Invoke-Expression -Command 'C:\Install\AcroRdrDC2001320064_en_US.exe /sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES'
-#Start-Process -FilePath "C:\Install\AcroRdrDC2001320064_en_US.exe" -ArgumentList "/sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES" #-Wait
+## Configure OneDrive
+$OneDriveURL="https://go.microsoft.com/fwlink/?linkid=2083517"
+$OneDriveInstallerFile="OneDriveSetup.exe"
+$HKLMregistryPath = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive'
+$DiskSizeregistryPath = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive\DiskSpaceCheckThresholdMB'##Path to max disk size key
+$KFMSilentOptIn = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive'
 
-# Wait for Adobe Installer to finish
-Start-Sleep -Seconds 180
+Invoke-WebRequest $OneDriveURL -OutFile $path\$OneDriveInstallerFile
+"$path\$OneDriveInstallerFile /allusers"
 
-# Install Visual Studio Code
-Invoke-WebRequest -Uri 'https://az764295.vo.msecnd.net/stable/622cb03f7e070a9670c94bae1a45d78d7181fbd4/VSCodeSetup-x64-1.53.2.exe' -OutFile 'c:\Install\VSCodeSetup-x64-1.53.2.exe'
-Invoke-Expression -Command 'C:\Install\VSCodeSetup-x64-1.53.2.exe /VERYSILENT /NORESTART /MERGETASKS=!runcode'
+# Wait till installation is completed
+Start-Sleep -Seconds 20
 
-# Wait for Visual Studio Code installer to finish
-Start-Sleep -Seconds 10
+IF(!(Test-Path $HKLMregistryPath))
+{New-Item -Path $HKLMregistryPath -Force}
+IF(!(Test-Path $DiskSizeregistryPath))
+{New-Item -Path $DiskSizeregistryPath -Force}
+New-ItemProperty -Path $HKLMregistryPath -Name 'SilentAccountConfig' -Value '1' -PropertyType DWORD -Force | Out-Null ##Enable silent account configuration
+New-ItemProperty -Path $DiskSizeregistryPath -Name $TenantGUID -Value '102400' -PropertyType DWORD -Force | Out-Null ##Set max OneDrive threshold before prompting
+New-ItemProperty -Path $KFMSilentOptIn -Name 'KFMSilentOptIn' -Value $TenantGUID -Force | Out-Null ##Silent redirect known folders to Onedrive
+
+
+## Configure FSlogix
+$fsLogixURL="https://aka.ms/fslogix_download"
+$installerFile="fslogix_download.zip"
+
+Try
+{
+    Invoke-WebRequest $fsLogixURL -OutFile $path\$installerFile
+    Expand-Archive $path\$installerFile -DestinationPath $path\fsLogix\extract
+    Start-Process -FilePath $path\fsLogix\extract\x64\Release\FSLogixAppsSetup.exe -Args "/install /quiet /norestart" -Wait
+    Write-Host "Fslogix Install Succeeded"
+    
+}
+Catch
+{
+    Write-Host "Fslogix Install Failed"
+    $ErrorMessage = $_.Exception.Message
+    Write-Host $ErrorMessage
+    $FailedItem = $_.Exception.ItemName
+    Write-Host $FailedItem
+} 
+
+
+## Configure Teams
+reg add "HKLM\SOFTWARE\Microsoft\Teams\" /v IsWVDEnvironment /t REG_DWORD /d 1 /f
+$TeamsURL = "https://teams.microsoft.com/downloads/desktopurl?env=production&plat=windows&arch=x64&managedInstaller=true&download=true"
+$TeamsInstaller = "Teams_windows_x64.msi"
+$WebRTCURL = "https://aka.ms/vs/16/release/vc_redist.x64.exe"
+$WebRTCInstaller = "vc_redist.x64.exe"
+
+Invoke-WebRequest $TeamsURL -OutFile $path\$TeamsInstaller
+Invoke-WebRequest $WebRTCURL -OutFile $path\$WebRTCInstaller 
+
+Start-Process msiexec.exe -Wait -ArgumentList '/I $path\Teams_windows_x64.msi OPTIONS="noAutoStart=true" ALLUSERS=1 ALLUSER=1'
+Start-Sleep -Seconds 20
+
+Start-Process -FilePath $path\vc_redist.x64.exe -Args "/quiet /norestart" -Wait
+
+#Disable auto-updates
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f
+#Time zone redirection
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fEnableTimeZoneRedirection /t REG_DWORD /d 1 /f
+#Disable Storage Sense
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy" /v 01 /t REG_DWORD /d 0 /f
+
+# add MSIX app attach certificate
+
+#maakt het mounten van images mogelijk SeManageVolumePrivilege en geeft de tools om bestanden op te vragen van Azure file share onder system
+#Kopieer de PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec naar %Windir%\System32
+
+#Maak in %Windir%\System32 een CMD bestand aan met de naam setPrivGpsvc en inhoud:
+#sc privs gpsvc SeManageVolumePrivilege/SeTcbPrivilege/SeTakeOwnershipPrivilege/SeIncreaseQuotaPrivilege/SeAssignPrimaryTokenPrivilege/SeSecurityPrivilege/SeChangeNotifyPrivilege/SeCreatePermanentPrivilege/SeShutdownPrivilege/SeLoadDriverPrivilege/SeRestorePrivilege/SeBackupPrivilege/SeCreatePagefilePrivilege
+
+#Open CMD als administrator en voer het volgende uit:
+#psexec /s cmd
+#setPrivGpsvc
+
+#bloadware eraf
+
+# NL taalinstellingen
+#zie https://docs.microsoft.com/nl-nl/azure/virtual-desktop/language-packs)
+#Herstart nodig
+#Pas tijdzone aan naar UTC +1
+
 
 # SIG # Begin signature block
 # MIINHAYJKoZIhvcNAQcCoIINDTCCDQkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB

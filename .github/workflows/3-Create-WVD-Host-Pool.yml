@@ -21,13 +21,13 @@ jobs:
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
           $CustomerPrefix = "Ucorp"
-          $ResourceGroup = "$CustomerPrefix-WVD-RG"
+          $ResourceGroup = "$CustomerPrefix-WVD1-RG"
           $Sig = "ucorpwvdsig" 
           $SigImageDefName = "Ucorp-WVD-Image"
           $VMSize = "Standard_D4s_v3" # Standard_D8s_v3
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "$CustomerPrefix-WVD-KV"
-          $HostPoolName = "$CustomerPrefix-WVD-Pool"
+          $HostPoolName = "$CustomerPrefix-WVD1-Pool"
           $NumberOfInstances = 2
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
