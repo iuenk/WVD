@@ -2,8 +2,8 @@ name: 5-Add-VM-Extension
 on: workflow_dispatch
 
 env:
-  RESOURCE_GROUP: "ucorp-wvd-rg"
-  WORKSPACE_NAME: "ucorp-wvd-law"
+  RESOURCE_GROUP: "Ucorp-WVD1-RG"
+  WORKSPACE_NAME: "Ucorp-WVD-LAW"
 
 jobs:
   build:
