@@ -1,10 +1,6 @@
 name: 5-Add-VM-Extension
 on: workflow_dispatch
 
-env:
-  RESOURCE_GROUP: "Ucorp-WVD1-RG"
-  WORKSPACE_NAME: "Ucorp-WVD-LAW"
-
 jobs:
   build:
     name: 5-Add-VM-Extension
@@ -23,12 +19,12 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$WorkspaceName = [System.Environment]::GetEnvironmentVariable('WORKSPACE_NAME')
-
           $Tags = @{"Environment"="WVD Production"}
+          $ResourceGroup = "Ucorp-WVD1-RG"
+          $ResourceGroupLAW = "Ucorp-Logging-RG"
+          $WorkspaceName = "Ucorp-WVD-LAW"
           $PublicSettings = @{"workspaceId" = "94584c69-48d1-4c8f-94cf-d8184dd0cd11"}
-          $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName "ucorp-storage2-rg" -Name $WorkspaceName).PrimarySharedKey
+          $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName $ResourceGroupLAW -Name $WorkspaceName).PrimarySharedKey
           $ProtectedSettings = @{"workspaceKey" = $key}
           $FileUri = @("https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/Virtual-Desktop-Optimalization-Tool-20H2.ps1")
           $Settings = @{"fileUris" = $FileUri};
