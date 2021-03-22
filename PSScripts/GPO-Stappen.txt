@@ -1,10 +1,17 @@
 #MSIX GPO Scripts startup and shutdown
-
+#Machine
 %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 -ExecutionPolicy Bypass -File \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.ps1 -ConfigFile \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.json -Mode VmStart
 
 %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 -ExecutionPolicy Bypass -File \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.ps1 -ConfigFile \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.json -Mode VmShutdown
+
+#User
+%windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+-ExecutionPolicy Bypass -File \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.ps1 -ConfigFile \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.json -Mode UserLogon
+
+%windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+-ExecutionPolicy Bypass -File \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.ps1 -ConfigFile \\ucorpwvdstd.file.core.windows.net\msixappattach\AppAttach.json -Mode UserLogoff
 
 #FSlogix GPO VHD location
 \\ucorpwvdprem.file.core.windows.net\fslogixprofiles

@@ -83,6 +83,7 @@ Invoke-Expression -Command "cmdkey /add:$StorageAccountPrem.file.core.windows.ne
 #SYSTEM (full control)
 #SG_WVD_Admins (Full control)
 #Domain Admins (Full control)
+#Domain Computers (Read, Modify, Execute)
 
 #fslogixprofiles
 #Domain Admins (Full control)
