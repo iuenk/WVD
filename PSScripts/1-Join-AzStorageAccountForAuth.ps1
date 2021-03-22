@@ -8,7 +8,7 @@ $OU = "OU=WVD,OU=Ucorp,DC=ucorp,DC=local"
 $SecurityGroupUsers = "SG_WVD_Users"
 $SecurityGroupAdmins = "SG_WVD_Admins"
 $ServicePrincipalName = "githubactionazure"
-$servicePrincipalApplicationID = (Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id)
+$servicePrincipalApplicationID  = (Get-AzADServicePrincipal -DisplayName $ServicePrincipalName).Id
 $servicePrincipalPassword = "accesskey"
 
 $path ="C:\AzFilesHybrid"

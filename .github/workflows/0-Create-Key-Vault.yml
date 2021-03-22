@@ -38,7 +38,7 @@ jobs:
           $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
           $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force 
 
-          $spid = Get-AzADServicePrincipal | Where-Object{$_.DisplayName -eq $ServicePrincipalName} | select -ExpandProperty Id
+          $spid = (Get-AzADServicePrincipal -DisplayName $ServicePrincipalName).Id
 
           New-AzKeyVault -Name $VaultName -ResourceGroupName $ResourceGroup -Location "westeurope" -Sku "standard" -Tag $Tags
           Set-AzKeyVaultAccessPolicy -VaultName $VaultName -ObjectId $spid -PermissionsToSecrets get,set,delete,list
