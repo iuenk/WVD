@@ -1,15 +1,6 @@
 name: 4-Add-WVD-Session-Host
 on: workflow_dispatch
 
-env:
-  AZURE_HOSTPOOL_NAME: "Ucorp-WVD1-Pool"     # set this to the WVD Hostpool name to add the instances
-  AZURE_NUMBER_OF_INSTANCES: 1                  # set this to the number of instances to add to the WVD Hostpool
-  SIG: "ucorpwvdsig"                            # SIG Name
-  SIG_IMAGE_DEF_NAME: "Ucorp-WVD-Image"         # Managed image from SIG
-  VAULT_NAME: "ucorp-wvd-kv"
-  CUSTOMER_PREFIX: "ucorp"
-  VMSIZE: "Standard_D4s_v3"                     # Standard_D8s_v3
-
 jobs:
   build:
     name: 4-Add-WVD-Session-Host
@@ -28,15 +19,14 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          [string]$HostPoolName = [System.Environment]::GetEnvironmentVariable('AZURE_HOSTPOOL_NAME')
-          [string]$Sig = [System.Environment]::GetEnvironmentVariable('SIG')
-          [string]$SigImageDefName = [System.Environment]::GetEnvironmentVariable('SIG_IMAGE_DEF_NAME')
-          [string]$CustomerPrefix = [System.Environment]::GetEnvironmentVariable('CUSTOMER_PREFIX')
-          [string]$vmSize = [System.Environment]::GetEnvironmentVariable('VMSIZE')
-          [string]$VaultName = [System.Environment]::GetEnvironmentVariable('VAULT_NAME')
-          [int]$NumberOfInstances = [System.Environment]::GetEnvironmentVariable('AZURE_NUMBER_OF_INSTANCES')
-
           $Tags = @{"Environment"="WVD Production"}
+          $CustomerPrefix = "Ucorp"
+          $HostPoolName = "Ucorp-WVD1-Pool" 
+          $Sig = "ucorpwvdsig"
+          $SigImageDefName = "Ucorp-WVD-Image"
+          $vmSize = "Standard_D4s_v3"
+          $VaultName = "Ucorp-WVD-KV"
+          $NumberOfInstances = 1
           
           # Retrieve the given Host Pool information
           try 
@@ -64,7 +54,7 @@ jobs:
             }
             $sessionHost = $sessionHosts[0]
 
-            $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-wvd-rg/providers/Microsoft.Compute/galleries/${{env.SIG}}/images/${{env.SIG_IMAGE_DEF_NAME}}";
+            $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
 
             # Retrieve sensitive information from KeyVault
             $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminpassword).SecretValue
