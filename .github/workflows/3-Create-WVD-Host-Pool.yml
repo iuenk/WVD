@@ -117,4 +117,9 @@ jobs:
           $ApplicationGroupReference = "$ResourceIDDesktopGroup","$ResourceIDRemoteAppGroup"
           Update-AzWvdWorkspace -ResourceGroupName $ResourceGroup -Name "$CustomerPrefix-wvd-Workspace" -ApplicationGroupReference $ApplicationGroupReference
 
+          #Add AD group to new created Groups
+          $SecurityGroupId = Get-AZADGroup | Where-Object {$_.MailNickname -eq $SecurityGroup} | Select-Object -ExpandProperty Id
+          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-DAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
+          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-RAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
+
         azPSVersion: 'latest'
