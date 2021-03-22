@@ -25,7 +25,7 @@ jobs:
           $Sig = "ucorpwvdsig" 
           $SigImageDefName = "$CustomerPrefix-WVD-Image"
           $VMSize = "Standard_D4s_v3" # Standard_D8s_v3
-          $VMDiskType = "StandardSDD_LRS" # Premium_LRS
+          $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "$CustomerPrefix-WVD-KV"
           $HostPoolName = "$CustomerPrefix-WVD-Pool"
           $NumberOfInstances = 2
