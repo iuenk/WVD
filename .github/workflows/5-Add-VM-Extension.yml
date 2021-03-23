@@ -20,10 +20,10 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
-          $ResourceGroup = "Ucorp-WVD1-RG"
+          $ResourceGroup = "Ucorp-WVD-RG"
           $ResourceGroupLAW = "Ucorp-Logging-RG"
           $WorkspaceName = "Ucorp-WVD-LAW"
-          $PublicSettings = @{"workspaceId" = "94584c69-48d1-4c8f-94cf-d8184dd0cd11"}
+          $PublicSettings = @{"workspaceId" = "4a577783-d3ef-4506-bab7-d8947ab0099c"}
           $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName $ResourceGroupLAW -Name $WorkspaceName).PrimarySharedKey
           $ProtectedSettings = @{"workspaceKey" = $key}
           $FileUri = @("https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/Virtual-Desktop-Optimalization-Tool-20H2.ps1")
