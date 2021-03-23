@@ -1,0 +1,12 @@
+#MSIX steps
+CD C:\Windows\System32
+.\PsExec.exe -s -accepteula -nobanner cmdkey /add:ucorpwvdstd.file.core.windows.net /user:AZURE\ucorpwvdstd /pass:DwtWjATH93vYsarh9SRnbLa+dCTy6w5XeC4xq088PfX2gjB6cYbe7pwdMnK5as7IfunAcb9jzdFwjDzc2W1wRA==
+.\PsExec.exe -s -accepteula -nobanner cmd.exe
+
+#FSlogix steps
+#FSlogix GPO VHD location
+\\ucorpwvdprem.file.core.windows.net\fslogixprofiles
+\\ucorpwvdprem.file.core.windows.net\fslogixoffice
+
+#FSlogix GPO Redirections location
+\\ucorpwvdprem.file.core.windows.net\fslogixprofiles
