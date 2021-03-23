@@ -36,7 +36,7 @@ jobs:
           $FunctionFilePath = [string]($env:TEMP + "\6-Ucorp-WVD-Scaling.ps1")
               
           # Script location on github
-          $ScriptUrl="https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/6-Ucorp-WVD-Scaling.ps1"
+          $ScriptUrl="https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/6-Ucorp-WVD-Scale.ps1"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $ScriptUrl -OutFile $FunctionFilePath -UseBasicParsing

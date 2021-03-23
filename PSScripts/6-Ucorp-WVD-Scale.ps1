@@ -65,8 +65,8 @@ $hostPoolName = 'Ucorp-WVD-Pool'
 # Session Host Resource Group
 # Session Hosts and Host Pools can exist in different Resource Groups, but are commonly the same
 # Host Pool Resource Group and the resource group of the Session host VM's.
-$hostPoolRg = 'Ucorp-WVD1-RG'
-$sessionHostVmRg= 'Ucorp-WVD1-RG'
+$hostPoolRg = 'Ucorp-WVD-RG'
+$sessionHostVmRg= 'Ucorp-WVD-RG'
 
 ############## Functions ####################
 
