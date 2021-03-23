@@ -54,10 +54,10 @@ jobs:
           $objTemplateParameter.Add("functionFile", $functionFileContents)
 
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\6-ARM-Create-WVD-Scaling.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\6-ARM-Create-WVD-Scale.json")
               
           # storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/6-ARM-Create-WVD-Scaling.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/6-ARM-Create-WVD-Scale.json"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
@@ -65,8 +65,9 @@ jobs:
           # ARM Template file
           ## Create WVD scaling function app
           New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroup -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -Tag $Tags -Verbose
-
+      
           # Give function app contributor rights on the WVD resource group
+          Start-Sleep -s 30
           $functionsAppNameId = Get-AzADServicePrincipal | Where-Object {$_.DisplayName -eq $functionsAppName} | Select-Object -ExpandProperty Id
           New-AzRoleAssignment -ObjectId $functionsAppNameId -RoleDefinitionName "Contributor" -ResourceGroupName $ResourceGroup
           
