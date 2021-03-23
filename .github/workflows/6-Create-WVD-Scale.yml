@@ -1,9 +1,9 @@
-name: 6-Create-WVD-Scaling
+name: 6-Create-WVD-Scale
 on: workflow_dispatch
 
 jobs:
   build:
-    name: 6-Create-WVD-Scaling
+    name: 6-Create-WVD-Scale
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
