@@ -151,7 +151,7 @@ jobs:
           }
 
           # Get all VM's created today
-          $logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).AddDays(-1)
+          $logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).Date 
           $VMs = @()
           foreach($log in $logs)
           {
