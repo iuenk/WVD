@@ -63,6 +63,7 @@ jobs:
               Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
               Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
               Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name  "OptimalizationPack" -Publisher "Microsoft.Compute" -Type "CustomScriptExtension" -TypeHandlerVersion "1.10" -Settings $Settings -ProtectedSettings $OptimalizationPack
+              
               Restart-AzVM -ResourceGroupName $ResourceGroup -Name $VM
             }
 

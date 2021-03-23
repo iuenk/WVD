@@ -162,7 +162,6 @@ jobs:
             }
           }
 
-          # # Check VM status if not running start it and wait till its running and place in in maintenance mode
           ForEach($VM in $VMs){
           Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $VM -AllowNewSession:$false
           }

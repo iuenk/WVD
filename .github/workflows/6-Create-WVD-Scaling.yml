@@ -21,7 +21,7 @@ jobs:
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
           $ResourceGroup = "Ucorp-WVD-RG"
-          $functionsAppName = "ucorpwvdscaling"
+          $functionsAppName = "ucorpwvdscale"
           $storageAccountName = "ucorpwvdstd"
           $storageAccountResourceGroup = "Ucorp-Storage-RG"
 
