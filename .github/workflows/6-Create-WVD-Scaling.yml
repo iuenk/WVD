@@ -45,11 +45,11 @@ jobs:
           $functionFileContents = [System.IO.File]::ReadAllText($FunctionFilePath)
           $objTemplateParameter = @{
             "functionsAppName" = $functionsAppName;
-            "FunctionName" = "ucorpwvdscalingtimer";
+            "FunctionName" = $functionsAppName;
             "functionSchedule" = "0 */5 * * * *";
             "functionsStorageAccountName" = $storageAccountName;
             "storageAccountResourceGroup" = $storageAccountResourceGroup;
-            "functionsAppServicePlanName" = "ucorpwvdscalingasp";
+            "functionsAppServicePlanName" = $functionsAppName;
             }
           $objTemplateParameter.Add("functionFile", $functionFileContents)
 
