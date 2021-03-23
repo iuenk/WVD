@@ -3,7 +3,7 @@ Self-Signed Certificate must be presented, also applied when creating MSIX packa
 New-SelfSignedCertificate -Type Custom -Subject "CN=Ucorp" -KeyUsage DigitalSignature -KeyAlgorithm RSA -KeyLength 2048 -CertStoreLocation "cert:\LocalMachine\My"
 
 CD C:\Windows\System32
-.\PsExec.exe -s -accepteula -nobanner cmdkey /add:ucorpwvdstd.file.core.windows.net /user:AZURE\ucorpwvdstd /pass:DwtWjATH93vYsarh9SRnbLa+dCTy6w5XeC4xq088PfX2gjB6cYbe7pwdMnK5as7IfunAcb9jzdFwjDzc2W1wRA==
+.\PsExec.exe -s -accepteula -nobanner cmdkey /add:workspacename.file.core.windows.net /user:AZURE\workspacename /pass:workspacekey
 .\PsExec.exe -s -accepteula -nobanner cmd.exe
 
 #FSlogix steps
