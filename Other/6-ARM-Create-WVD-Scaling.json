@@ -75,7 +75,7 @@
         "functionsStorageAccountName": "[parameters('functionsStorageAccountName')]",
         "storageAccountResourceGroup": "[parameters('storageAccountResourceGroup')]",
         "functionsStorageAccountResourceId": "[resourceId(variables('storageAccountResourceGroup'),'Microsoft.Storage/storageAccounts', variables('functionsStorageAccountName'))]",
-        "applicationInsightsName": "[parameters('FunctionName')]"
+        "applicationInsightsName": "FunctionAppInsights"
     },
     "resources": [
         {
@@ -148,11 +148,9 @@
                     "type": "config",
                     "apiVersion": "2014-11-01",
                     "properties": {
-                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2015-05-01').InstrumentationKey]",
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2014-04-01').InstrumentationKey]",
                         "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]",
-                        "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]",
-                        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]",
-                        "WEBSITE_CONTENTSHARE": "[parameters('FunctionName')]"
+                        "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/sites', variables('functionsAppName'))]",
