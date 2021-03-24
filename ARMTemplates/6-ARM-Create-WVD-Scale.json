@@ -148,8 +148,6 @@
                     "type": "config",
                     "apiVersion": "2014-11-01",
                     "properties": {
-                        "FUNCTIONS_EXTENSION_VERSION": "~3",
-                        "FUNCTIONS_WORKER_RUNTIME": "powershell",
                         "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2015-05-01').InstrumentationKey]",
                         "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]",
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]",
