@@ -156,8 +156,6 @@
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionsStorageAccountName'), ';AccountKey=', listKeys(variables('functionsStorageAccountResourceId'),'2015-05-01-preview').key1)]",
                         "WEBSITE_CONTENTSHARE": "[parameters('FunctionName')]"
                     },
-                    "use32BitWorkerProcess": true,
-                    "powerShellVersion": "~7",
 
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/sites', variables('functionsAppName'))]",

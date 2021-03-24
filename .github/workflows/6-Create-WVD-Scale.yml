@@ -33,7 +33,7 @@ jobs:
           }
 
           # Temp location for the run.ps1 (discarded when runbook is finished)
-          $FunctionFilePath = [string]($env:TEMP + "\6-Ucorp-WVD-Scaling.ps1")
+          $FunctionFilePath = [string]($env:TEMP + "\6-Ucorp-WVD-Scale.ps1")
               
           # Script location on github
           $ScriptUrl="https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/6-Ucorp-WVD-Scale.ps1"
