@@ -37,35 +37,34 @@ jobs:
           $VMs = @()
           foreach($log in $logs)
           {
-              if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
-              {
-                  Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
-                  $VMs += $($log.Id.split("/")[8])
-              }
+            if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
+            {
+              Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
+              $VMs += $($log.Id.split("/")[8])
+            }
           }
 
           # Check VM status if not running start it and wait till its running, next install VM extensions.
           ForEach($VM in $VMs){
-            $provisioningState = ""
-            $condition = ($provisioningState -eq "PowerState/running")
+          $provisioningState = ""
+          $condition = ($provisioningState -eq "PowerState/running")
             while (!$condition){
-              if ($lastProvisioningState -ne $provisioningState){
-                  write-host $VM "under" $resourceGroup "is" $provisioningState "(waiting for state change)"
-                  Start-AzVM -ResourceGroupName $ResourceGroup -Name $VM 
-              }
+            if ($lastProvisioningState -ne $provisioningState){
+              write-host $VM "under" $resourceGroup "is" $provisioningState "(waiting for state change)"
+              Start-AzVM -ResourceGroupName $ResourceGroup -Name $VM 
+            }
               $lastProvisioningState = $provisioningState
               Start-Sleep -Seconds 5
               $provisioningState = (Get-AzVM -Resourcegroupname $resourceGroup -Name $VM -Status).Statuses[1].Code
               $condition = ($provisioningState -eq "PowerState/running")       
-              }
-              write-host $VM "under" $resourceGroup "is" $provisioningState
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "MicrosoftMonitoringAgent" -Publisher "Microsoft.EnterpriseCloud.Monitoring" -Type "MicrosoftMonitoringAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "AzureMonitorWindowsAgent" -Publisher "Microsoft.Azure.Monitor" -Type "AzureMonitorWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name  "OptimalizationPack" -Publisher "Microsoft.Compute" -Type "CustomScriptExtension" -TypeHandlerVersion "1.10" -Settings $Settings -ProtectedSettings $OptimalizationPack
-              Update-AzWvdSessionHost -ResourceGroupName $ResourceGroup -HostPoolName $HostPoolName -Name $VM -AllowNewSession:$true
-              Restart-AzVM -ResourceGroupName $ResourceGroup -Name $VM
             }
+            write-host $VM "under" $resourceGroup "is" $provisioningState
+            Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "MicrosoftMonitoringAgent" -Publisher "Microsoft.EnterpriseCloud.Monitoring" -Type "MicrosoftMonitoringAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+            Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "AzureMonitorWindowsAgent" -Publisher "Microsoft.Azure.Monitor" -Type "AzureMonitorWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+            Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+            Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+            Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name  "OptimalizationPack" -Publisher "Microsoft.Compute" -Type "CustomScriptExtension" -TypeHandlerVersion "1.10" -Settings $Settings -ProtectedSettings $OptimalizationPack
+            Restart-AzVM -ResourceGroupName $ResourceGroup -Name $VM
+           }
 
         azPSVersion: 'latest'
