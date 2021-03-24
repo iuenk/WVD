@@ -46,8 +46,13 @@ jobs:
 
           # Check VM status if not running start it and wait till its running, next install VM extensions.
           ForEach($VM in $VMs){
-          $provisioningState = ""
-          $condition = ($provisioningState -eq "PowerState/running")
+          Get-AzVM -ResourceGroupName $ResourceGroup -Name $VM -ErrorVariable notPresent -ErrorAction SilentlyContinue
+          if ($notPresent) {
+            Write-Output "VM not found."
+          }
+          Else {
+            $provisioningState = ""
+            $condition = ($provisioningState -eq "PowerState/running")
             while (!$condition){
             if ($lastProvisioningState -ne $provisioningState){
               write-host $VM "under" $resourceGroup "is" $provisioningState "(waiting for state change)"
