@@ -151,4 +151,4 @@ jobs:
           New-AzResourceGroupDeployment -ResourceGroupName $hostpoolRG -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Verbose
           }
 
-         azPSVersion: 'latest'
+        azPSVersion: 'latest'
