@@ -1,9 +1,9 @@
-name: 4-Add-WVD-Session-Host
+name: 4-Add-WVD-Session-Hosts
 on: workflow_dispatch
 
 jobs:
   build:
-    name: 4-Add-WVD-Session-Host
+    name: 4-Add-WVD-Session-Hosts
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
