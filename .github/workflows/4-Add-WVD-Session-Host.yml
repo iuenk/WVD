@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
   build:
-    name: 4-Add-WVD-Session-Host
+    name: 4-Add-WVD-Session-Host1
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
@@ -26,7 +26,7 @@ jobs:
           $SigImageDefName = "Ucorp-WVD-Image"
           $vmSize = "Standard_D4s_v3"
           $VaultName = "Ucorp-WVD-KV"
-          $NumberOfInstances = 2
+          $NumberOfInstances = 1
           
           # Retrieve the given Host Pool information
           try 
