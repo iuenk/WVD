@@ -150,4 +150,21 @@ jobs:
             New-AzResourceGroupDeployment -ResourceGroupName $hostpoolRG -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Verbose
           }
 
+          # Get all VM's created today
+          Start-Sleep -Seconds 60
+          $logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).Date 
+          $VMs = @()
+          foreach($log in $logs)
+          {
+            if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
+            {
+              Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
+              $VMs += $($log.Id.split("/")[8])
+            }
+          }
+
+          ForEach($VM in $VMs){
+          Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $VM -AllowNewSession:$false
+          }
+
         azPSVersion: 'latest'
