@@ -4,11 +4,6 @@
 .DESCRIPTION
     Customization script for Azure Image Builder
 .NOTES
-    Author: Esther Barthel, MSc
-    Version: 0.1
-    Created: 2020-11-26
-    Updated: 2020-11-26 - 
-
     Research Links: 
 #>
 
