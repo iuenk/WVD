@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
   build:
-    name: 4-Add-WVD-Session-Host1
+    name: 4-Add-WVD-Session-Host
     runs-on: windows-latest
     steps:
     # Authentication: log on to Azure with the AZURE_CREDENTIALS secret
@@ -45,14 +45,25 @@ jobs:
             # Retrieve the current Session Host information
             try
             {
-              $sessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG)
+              $sessionHost = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG) | Select-Object -Last 1
             }
             catch
             {
               Write-Error ("A [" + $_.Exception.GetType().FullName + "] ERROR occurred. " + $_.Exception.Message)
               Break
             }
-            $sessionHost = $sessionHosts[0]
+
+            # Retrieve the VMTemplate information
+            $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
+            $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
+            if($sessionHostNumber -eq $null)
+            {
+              $vmInitialNumber = 0
+            }
+            Else {
+              $lastSessionHostNumber = [int]($sessionHostNumber)
+              $vmInitialNumber = $lastSessionHostNumber + 1
+            }
 
             $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
 
@@ -66,10 +77,7 @@ jobs:
             $domainAdminUser = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainAdminUser)))
             $domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
             $ouPath = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureOuPath)))
-            
-            # Retrieve the VMTemplate information
-            $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
-            
+                      
             # Retrieve the vNet and subnet information of the VM
             $sessionHostName = $($sessionHost.Name.Split("/")[1].Split(".")[0])
             $sessionHostRG = (Get-AzVM -Name $sessionHostName).ResourceGroupName
@@ -97,7 +105,7 @@ jobs:
               "hostpoolProperties" = @{};
               "hostpoolLocation" = $($hostPool.Location);
               "createAvailabilitySet" = $false;
-              "vmInitialNumber" = $($sessionHosts.Count);
+              "vmInitialNumber" = $vmInitialNumber;
               "vmResourceGroup" = $($sessionHostRG);
               "vmLocation" = $($sessionHostLocation);
               "vmSize" = $vmSize;
