@@ -62,7 +62,7 @@ jobs:
             }
             Else {
               $lastSessionHostNumber = [int]($sessionHostNumber)
-              $vmInitialNumber = $lastSessionHostNumber + 1
+              $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
             }
 
             $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
