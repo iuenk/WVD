@@ -45,7 +45,7 @@ jobs:
             # Retrieve the current Session Host information
             try
             {
-              $sessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG) | Select-Object -Last 1
+              $sessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG)
             }
             catch
             {
