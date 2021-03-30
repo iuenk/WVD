@@ -53,7 +53,7 @@ jobs:
               Break
             }
 
-            # Retrieve the VMTemplate information
+            # Determine new Session Host number
             $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
             $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
             if($sessionHostNumber -eq $null)
