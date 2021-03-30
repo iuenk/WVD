@@ -159,7 +159,7 @@ jobs:
           }
 
           # Place new Session Hosts in maintenance
-          $newSessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG) | Select-Object -Last $NumberOfInstances
+          $newSessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $hostpoolRG | Select-Object -Last $NumberOfInstances
           Foreach($newSessionHost in $newSessionHosts){
             $InputString = $newSessionhost.Name
             $WVDArray = $InputString.Split("/")
@@ -168,7 +168,6 @@ jobs:
 
             Write-host Disabling new sessions for session host: $WVDArray[1]
             Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $WVDArray[1] -AllowNewSession:$false
-            }
           }
 
         azPSVersion: 'latest'
