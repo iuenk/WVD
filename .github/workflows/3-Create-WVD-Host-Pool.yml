@@ -94,10 +94,10 @@ jobs:
           }
 
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\3-ARM-Create-WVD-Hostpool.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\3-ARM-WVD-Hostpool")
 
           # Storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/3-ARM-Create-WVD-Hostpool.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/3-ARM-WVD-Hostpool"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
