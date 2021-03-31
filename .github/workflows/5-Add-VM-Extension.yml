@@ -21,30 +21,43 @@ jobs:
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
           $HostPoolName = "Ucorp-WVD-Pool"
-          $ResourceGroup = "Ucorp-WVD-RG"
-          $ResourceGroupLAW = "Ucorp-Logging-RG"
+          $ResourceGroup = "Ucorp-Logging-RG"
           $WorkspaceName = "Ucorp-WVD-LAW"
-          $PublicSettings = @{"workspaceId" = "4a577783-d3ef-4506-bab7-d8947ab0099c"}
-          $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName $ResourceGroupLAW -Name $WorkspaceName).PrimarySharedKey
+          $WorkspaceId = (Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroup -Name $WorkspaceName).CustomerId
+          $PublicSettings = @{"workspaceId" = $workspaceId}
+          $key = (Get-AzOperationalInsightsWorkspaceSharedKey -ResourceGroupName $ResourceGroup -Name $WorkspaceName).PrimarySharedKey
           $ProtectedSettings = @{"workspaceKey" = $key}
           $FileUri = @("https://raw.githubusercontent.com/iuenk/WVD/main/PSScripts/Virtual-Desktop-Optimalization-Tool-20H2.ps1")
           $Settings = @{"fileUris" = $FileUri};
           $OptimalizationPack = @{"commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File Virtual-Desktop-Optimalization-Tool-20H2.ps1"};
           $Location = "westeurope"
+          $NumberOfInstances = 1
 
-          # Get all VM's created today
-          $logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).Date
-          $VMs = @()
-          foreach($log in $logs)
-          {
-            if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
-            {
-              Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
-              $VMs += $($log.Id.split("/")[8])
-            }
+          # Retrieve the given Host Pool information
+          $hostPool = Get-AzWvdHostPool -SubscriptionId $SubscriptionId | Where {$_.Name -eq $HostPoolName}
+          $hostpoolRG = $hostPool.Id.Split("/")[4]
+          $hostpoolName = $hostPool.Id.Split("/")[-1]
+
+          # Place new Session Hosts in maintenance
+          $newSessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $hostpoolRG | Select-Object -Last $NumberOfInstances
+          Foreach($newSessionHost in $newSessionHosts){
+            $InputString = $newSessionhost.Name
+            $WVDArray = $InputString.Split("/")
+            $WVDArray[0]
+            $WVDArray[1]
+
+            Write-host Disabling new sessions for session host: $WVDArray[1]
+            Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $WVDArray[1] -AllowNewSession:$false
           }
 
-          # Check VM status if not running start it and wait till its running, next install VM extensions.
+          # Format new Session hosts name(s) needed for next action
+          $VMs = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $hostpoolRG | Select-Object -Last $NumberOfInstances |
+          ForEach {
+          $wvdSessionHost = $_
+          $wvdSessionHost.Name.Split("/")[1].Split(".")[0]
+          }
+
+          # Check VM status if not running start it wait till its running and next install VM extensions
           ForEach($VM in $VMs){
           Get-AzVM -ResourceGroupName $ResourceGroup -Name $VM -ErrorVariable notPresent -ErrorAction SilentlyContinue
           if ($notPresent) {
@@ -64,13 +77,71 @@ jobs:
               $condition = ($provisioningState -eq "PowerState/running")       
             }
               write-host $VM "under" $resourceGroup "is" $provisioningState
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "MicrosoftMonitoringAgent" -Publisher "Microsoft.EnterpriseCloud.Monitoring" -Type "MicrosoftMonitoringAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "AzureMonitorWindowsAgent" -Publisher "Microsoft.Azure.Monitor" -Type "AzureMonitorWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              Set-AzVMExtension -ResourceGroupName $ResourceGroup -Location $Location -VMName $VM -Name  "OptimalizationPack" -Publisher "Microsoft.Compute" -Type "CustomScriptExtension" -TypeHandlerVersion "1.10" -Settings $Settings -ProtectedSettings $OptimalizationPack
-              Restart-AzVM -ResourceGroupName $ResourceGroup -Name $VM
+
+              # Install Microsoft Monitoring Agent
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "MicrosoftMonitoringAgent" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "MicrosoftMonitoringAgent" -Publisher "Microsoft.EnterpriseCloud.Monitoring" -Type "MicrosoftMonitoringAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings          
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension MicrosoftMonitoringAgent already installed"
+              }
+
+              # Install Azure Monitoring Windows Agent
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "AzureMonitorWindowsAgent" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "AzureMonitorWindowsAgent" -Publisher "Microsoft.Azure.Monitor" -Type "AzureMonitorWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension AzureMonitorWindowsAgent already installed"
+              }
+
+              # Install Dependency Windows Agent
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "DependencyAgentWindows" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension DependencyAgentWindows already installed"
+              }
+
+              # Install Guest Health Windows Agent
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "GuestHealthWindowsAgent" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension GuestHealthWindowsAgent already installed"
+              }
+
+              # Install Optimalization Pack
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "OptimalizationPack" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "OptimalizationPack" -Publisher "Microsoft.Compute" -Type "CustomScriptExtension" -TypeHandlerVersion "1.10" -Settings $Settings -ProtectedSettings $OptimalizationPack
+              }
+              else
+              {
+                Write-Output "Skipping VM - Extension OptimalizationPack already installed"
+              }
+
+              Restart-AzVM -ResourceGroupName $hostpoolRG -Name $VM
+
             }
+          }
+
+          # Remove new Session Host from maintenance
+          Foreach($newSessionHost in $newSessionHosts){
+            $InputString = $newSessionhost.Name
+            $WVDArray = $InputString.Split("/")
+            $WVDArray[0]
+            $WVDArray[1]
+
+            Write-host Enabling new sessions for session host: $WVDArray[1]
+            Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $WVDArray[1] -AllowNewSession:$true
           }
 
         azPSVersion: 'latest'
