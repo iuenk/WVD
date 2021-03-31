@@ -28,7 +28,7 @@ jobs:
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "Ucorp-WVD-KV"
           $HostPoolName = "Ucorp-WVD1-Pool"
-          $NumberOfInstances = 1
+          $NumberOfInstances = 2
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
           $Ram = "16"
@@ -85,7 +85,7 @@ jobs:
             "hostpoolType" = "Pooled";
             "maxSessionLimit" = 8;
             "loadBalancerType" = "DepthFirst";
-            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-wvd-rg/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName`",`"namePrefix`":`"$($CustomerPrefix)-WVD`",`"osDiskType`"`:`"$VMDiskType`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"$VMDiskType`",`"cores`"`:$Cores,`"ram`"`:$Ram},`"galleryItemId`"`:null}";
+            "vmTemplate" = "{`"domain`"`:`"$($domainName)`",`"galleryImageOffer`"`:null,`"galleryImagePublisher`"`:null,`"galleryImageSKU`"`:null,`"imageType`"`:`"CustomImage`",`"imageUri`"`:null,`"customImageId`"`:`"/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName`",`"namePrefix`":`"$($CustomerPrefix)-WVD`",`"osDiskType`"`:`"$VMDiskType`",`"useManagedDisks`"`:true,`"vmSize`"`:{`"id`"`:`"$VMDiskType`",`"cores`"`:$Cores,`"ram`"`:$Ram},`"galleryItemId`"`:null}";
             "tokenExpirationTime" = $(Get-Date ((Get-Date).AddDays(25)) -Format "yyyy-MM-ddTHH:mm:ss.fffZ");
             "apiVersion" = "2019-12-10-preview";
             "administratorAccountUsername" = "$($domainAdminUser)";
