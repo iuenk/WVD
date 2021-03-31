@@ -21,20 +21,20 @@ jobs:
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
           $CustomerPrefix = "Ucorp1"
-          $ResourceGroup = "$CustomerPrefix-WVD1-RG"
+          $ResourceGroup = "Ucorp-WVD1-RG"
           $Sig = "ucorpwvdsig" 
           $SigImageDefName = "Ucorp-WVD-Image"
           $VMSize = "Standard_D4s_v3" # Standard_D8s_v3
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "Ucorp-WVD-KV"
-          $HostPoolName = "$CustomerPrefix-WVD1-Pool"
+          $HostPoolName = "Ucorp-WVD1-Pool"
           $NumberOfInstances = 1
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
           $Ram = "16"
-          $VNetName = "$CustomerPrefix-vNet"
-          $SubnetName = "$CustomerPrefix-WVD-Subnet"
-          $VNetResourceGroup = "$CustomerPrefix-Network-RG"
+          $VNetName = "Ucorp-vNet"
+          $SubnetName = "Ucorp-WVD-Subnet"
+          $VNetResourceGroup = "Ucorp-Network-RG"
 
           # Retrieve sensitive information from KeyVault
           $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminpassword).SecretValue
@@ -73,7 +73,7 @@ jobs:
             "vmNumberOfInstances" = $NumberOfInstances;
             "vmNamePrefix" = "$($CustomerPrefix)-WVD";
             "vmImageType" = "CustomImage";
-            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$ResourceGroup/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
+            "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
             "vmDiskType" = $VMDiskType;
             "vmUseManagedDisks" = $true;
             "existingVnetName" = $VNetName;
