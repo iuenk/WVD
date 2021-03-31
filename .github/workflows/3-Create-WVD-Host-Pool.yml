@@ -20,14 +20,14 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
-          $CustomerPrefix = "Ucorp1"
-          $ResourceGroup = "Ucorp-WVD1-RG"
+          $CustomerPrefix = "Ucorp2"
+          $ResourceGroup = "Ucorp-WVD2-RG"
           $Sig = "ucorpwvdsig" 
           $SigImageDefName = "Ucorp-WVD-Image"
           $VMSize = "Standard_D4s_v3" # Standard_D8s_v3
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "Ucorp-WVD-KV"
-          $HostPoolName = "Ucorp-WVD1-Pool"
+          $HostPoolName = "Ucorp-WVD2-Pool"
           $NumberOfInstances = 2
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
