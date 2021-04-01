@@ -20,14 +20,14 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="WVD Production"}
-          $CustomerPrefix = "Ucorp3"
-          $ResourceGroup = "Ucorp-WVD3-RG"
+          $CustomerPrefix = "Ucorp"
+          $ResourceGroup = "Ucorp-WVD-RG"
           $Sig = "ucorpwvdsig" 
           $SigImageDefName = "Ucorp-WVD-Image"
           $VMSize = "Standard_D4s_v3" # Standard_D8s_v3
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "Ucorp-WVD-KV"
-          $HostPoolName = "Ucorp-WVD3-Pool"
+          $HostPoolName = "Ucorp-WVD-Pool"
           $NumberOfInstances = 1
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
@@ -94,10 +94,10 @@ jobs:
           }
 
           # Temp location for the ARM template that will be used by this script (discarded when runbook is finished)
-          $jsonARMTemplateFile = [string]($env:TEMP + "\3-ARM-WVD-Hostpool.json")
+          $jsonARMTemplateFile = [string]($env:TEMP + "\3-ARM-Create-WVD-Hostpool.json")
 
           # Storage location for custom ARM template
-          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/3-ARM-WVD-Hostpool.json"
+          $templateUrl="https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/3-ARM-Create-WVD-Hostpool.json"
 
           # Retrieve the template file and save it in a temp file location
           Invoke-WebRequest -Uri $templateUrl -OutFile $jsonARMTemplateFile -UseBasicParsing
