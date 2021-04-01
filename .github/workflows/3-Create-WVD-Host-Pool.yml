@@ -79,7 +79,6 @@ jobs:
             "existingVnetName" = $VNetName;
             "existingSubnetName" = $SubnetName;
             "virtualNetworkResourceGroupName" = $VNetResourceGroup;
-            "usePublicIP" = $false;
             "createNetworkSecurityGroup" = $false;
             "virtualMachineTags" = $Tags;
             "hostpoolType" = "Pooled";
