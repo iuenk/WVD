@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "nestedTemplatesLocation": {
@@ -7,14 +7,14 @@
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located."
             },
-            "defaultValue": "https://catalogartifact.azureedge.net/publicartifacts/Microsoft.Hostpool-ARM-1.0.15-preview/"
+            "defaultValue": "https://catalogartifact.azureedge.net/publicartifacts/Microsoft.Hostpool-ARM-1.2.1/"
         },
         "artifactsLocation": {
             "type": "string",
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located."
             },
-            "defaultValue": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration.zip"
+            "defaultValue": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_1-25-2021.zip"
         },
         "hostpoolName": {
             "type": "string",
@@ -23,7 +23,7 @@
             }
         },
         "hostpoolToken": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "The token of the host pool where the session hosts will be added."
             }
@@ -60,20 +60,109 @@
             "type": "string",
             "metadata": {
                 "description": "A username in the domain that has privileges to join the session hosts to the domain. For example, 'user1@contoso.com'."
-            }
+            },
+			"defaultValue": ""						  
         },
         "administratorAccountPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "The password that corresponds to the existing domain username."
-            }
+            },
+			"defaultValue": ""							  
         },
+        "vmAdministratorAccountUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "A username to be used as the virtual machine administrator account. The vmAdministratorAccountUsername and  vmAdministratorAccountPassword parameters must both be provided. Otherwise, domain administrator credentials provided by administratorAccountUsername and administratorAccountPassword will be used."
+            },
+            "defaultValue": ""
+        },
+        "vmAdministratorAccountPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password associated with the virtual machine administrator account. The vmAdministratorAccountUsername and  vmAdministratorAccountPassword parameters must both be provided. Otherwise, domain administrator credentials provided by administratorAccountUsername and administratorAccountPassword will be used."
+            },
+            "defaultValue": ""
+        },
+        "availabilityOption": {
+            "type": "string",
+            "metadata": {
+                "description": "Select the availability options for the VMs."
+            },
+            "defaultValue": "None",
+            "allowedValues": [
+                "None",
+                "AvailabilitySet",
+                "AvailabilityZone"
+            ]
+        },
+        "availabilitySetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of avaiability set to be used when create the VMs."
+            },
+            "defaultValue": ""
+        },							 
         "createAvailabilitySet": {
             "type": "bool",
             "metadata": {
                 "description": "Whether to create a new availability set for the VMs"
-            }
+            },
+			"defaultValue": false								 
         },
+        "availabilitySetUpdateDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "The platform update domain count of avaiability set to be created."
+            },
+            "defaultValue": 5,
+            "allowedValues": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20
+            ]
+        },
+        "availabilitySetFaultDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "The platform fault domain count of avaiability set to be created."
+            },
+            "defaultValue": 2,
+            "allowedValues": [
+                1,
+                2,
+                3
+            ]
+        },
+        "availabilityZone": {
+            "type": "int",
+            "metadata": {
+                "description": "The number of availability zone to be used when create the VMs."
+            },
+            "defaultValue": 1,
+            "allowedValues": [
+                1,
+                2,
+                3
+            ]
+        },											 						 
         "vmResourceGroup": {
             "type": "string",
             "metadata": {
@@ -201,35 +290,6 @@
                 "description": "The resource group containing the existing virtual network."
             }
         },
-        "usePublicIP": {
-            "type": "bool",
-            "metadata": {
-                "description": "Whether to use a Public IP"
-            },
-            "defaultValue": false
-        },
-        "publicIpAddressSku": {
-            "type": "string",
-            "metadata": {
-                "description": "The sku name of the Public IP"
-            },
-            "allowedValues": [
-                "Basic",
-                "Standard"
-            ],
-            "defaultValue": "Basic"
-        },
-        "publicIpAddressType": {
-            "type": "string",
-            "metadata": {
-                "description": "The address type of the Public IP"
-            },
-            "allowedValues": [
-                "Dynamic",
-                "Static"
-            ],
-            "defaultValue": "Dynamic"
-        },
         "createNetworkSecurityGroup": {
             "type": "bool",
             "metadata": {
@@ -269,13 +329,6 @@
             "type": "object",
             "metadata": {
                 "description": "The tags to be assigned to the network security groups"
-            },
-            "defaultValue": {}
-        },
-        "publicIPAddressTags": {
-            "type": "object",
-            "metadata": {
-                "description": "The tags to be assigned to the public ip addresses"
             },
             "defaultValue": {}
         },
@@ -320,16 +373,28 @@
                 "description": "Domain to join"
             },
             "defaultValue": ""
+        },
+        "aadJoin": {
+            "type": "bool",
+            "metadata": {
+                "description": "True if AAD Join, false if AD join"
+            },
+            "defaultValue": false
+        },
+        "intune": {
+            "type": "bool",
+            "metadata": {
+                "description": "True if intune enrollment is selected.  False otherwise"
+            },
+            "defaultValue": false		  					 
         }
     },
     "variables": {
         "rdshManagedDisks": "[if(equals(parameters('vmImageType'), 'CustomVHD'), parameters('vmUseManagedDisks'), bool('true'))]",
         "rdshPrefix": "[concat(parameters('vmNamePrefix'),'-')]",
         "avSetSKU": "[if(variables('rdshManagedDisks'), 'Aligned', 'Classic')]",
-        "existingDomainUsername": "[first(split(parameters('administratorAccountUsername'), '@'))]",
         "vhds": "[concat('vhds','/', variables('rdshPrefix'))]",
         "subnet-id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('existingVnetName'), parameters('existingSubnetName'))]",
-        "hostpoolName": "[replace(parameters('hostpoolName'),'\"','')]",
         "vmTemplateName": "[concat( if(variables('rdshManagedDisks'), 'managedDisks', 'unmanagedDisks'), '-', toLower(replace(parameters('vmImageType'),' ', '')), 'vm')]",
         "vmTemplateUri": "[concat(parameters('nestedTemplatesLocation'), variables('vmTemplateName'),'.json')]",
         "rdshVmNamesOutput": {
@@ -354,7 +419,7 @@
             "properties": {
                 "mode": "Incremental",
                 "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "resources": [
                         {
@@ -377,7 +442,7 @@
             "properties": {
                 "mode": "Incremental",
                 "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "resources": [
                         {
@@ -419,6 +484,15 @@
                     "artifactsLocation": {
                         "value": "[parameters('artifactsLocation')]"
                     },
+                    "availabilityOption": {
+                        "value": "[parameters('availabilityOption')]"
+                    },
+                    "availabilitySetName": {
+                        "value": "[parameters('availabilitySetName')]"
+                    },
+                    "availabilityZone": {
+                        "value": "[parameters('availabilityZone')]"
+                    },										     
                     "vmImageVhdUri": {
                         "value": "[parameters('vmImageVhdUri')]"
                     },
@@ -449,6 +523,12 @@
                     "enableAcceleratedNetworking": {
                         "value": false
                     },
+                    "vmAdministratorAccountUsername": {
+                        "value": "[parameters('vmAdministratorAccountUsername')]"
+                    },
+                    "vmAdministratorAccountPassword": {
+                        "value": "[parameters('vmAdministratorAccountPassword')]"
+                    },													    
                     "administratorAccountUsername": {
                         "value": "[parameters('administratorAccountUsername')]"
                     },
@@ -467,15 +547,6 @@
                     "location": {
                         "value": "[parameters('vmLocation')]"
                     },
-                    "usePublicIP": {
-                        "value": "[parameters('usePublicIP')]"
-                    },
-                    "publicIpAddressType": {
-                        "value": "[parameters('publicIpAddressType')]"
-                    },
-                    "publicIpAddressSku": {
-                        "value": "[parameters('publicIpAddressSku')]"
-                    },
                     "createNetworkSecurityGroup": {
                         "value": "[parameters('createNetworkSecurityGroup')]"
                     },
@@ -490,9 +561,6 @@
                     },
                     "networkSecurityGroupTags": {
                         "value": "[parameters('networkSecurityGroupTags')]"
-                    },
-                    "publicIPAddressTags": {
-                        "value": "[parameters('publicIPAddressTags')]"
                     },
                     "virtualMachineTags": {
                         "value": "[parameters('virtualMachineTags')]"
@@ -515,6 +583,12 @@
                     "ouPath": {
                         "value": "[parameters('ouPath')]"
                     },
+                    "aadJoin": {
+                        "value": "[parameters('aadJoin')]"
+                    },
+                    "intune": {
+                        "value": "[parameters('intune')]"
+                    },									  
                     "_guidValue": {
                         "value": "[parameters('deploymentId')]"
                     }

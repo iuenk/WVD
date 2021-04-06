@@ -118,13 +118,14 @@ jobs:
               "existingVnetName" = $($vnetInfo);
               "existingSubnetName" = $($subnetInfo);
               "virtualNetworkResourceGroupName" = $($vnetrgInfo);
-              "usePublicIP" = $false;
               "createNetworkSecurityGroup" = $false;
               "virtualMachineTags" = $Tags;
               "apiVersion" = "2019-12-10-preview";
               "administratorAccountUsername" = "$($domainAdminUser)";
               "domain"="$($domainName)";
               "ouPath"="$($ouPath)";
+              "aadJoin" = $false;
+              "intune" = $false;
             }
             
             # Add additional parameters, based on image type
