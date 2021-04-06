@@ -34,7 +34,7 @@ jobs:
           $NumberOfInstances = 1
 
           # Retrieve the given Host Pool information
-          $hostPool = Get-AzWvdHostPool -SubscriptionId $SubscriptionId | Where {$_.Name -eq $HostPoolName}
+          $hostPool = Get-AzWvdHostPool -SubscriptionId ${{secrets.AZURE_SUBSCRIPTIONID}} | Where {$_.Name -eq $HostPoolName}
           $hostpoolRG = $hostPool.Id.Split("/")[4]
           $hostpoolName = $hostPool.Id.Split("/")[-1]
 
