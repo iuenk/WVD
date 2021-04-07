@@ -57,6 +57,7 @@ jobs:
           ## Create a Template Parameter Object (hashtable)
           $objTemplateParameter = @{
             "hostpoolName" = $HostPoolName;
+            "hostpoolTags" = $Tags;
             "hostpoolDescription" = "Created by GitHub Actions, PowerShell and ARM Template";
             "location" = "westeurope";
             "validationEnvironment" = $false;
@@ -65,7 +66,9 @@ jobs:
             "workspaceLocation" = "westeurope";
             "workspaceResourceGroup" = $ResourceGroup;
             "allApplicationGroupReferences" = "";
+            "applicationGroupTags" = $Tags;
             "createAvailabilitySet" = $true;
+            "availabilitySetTags" = $Tags;
             "customRdpProperty" = "audiocapturemode:i:1;camerastoredirect:s:*;"
             "vmResourceGroup" = $ResourceGroup;
             "vmLocation" = "westeurope";
@@ -74,12 +77,15 @@ jobs:
             "vmNamePrefix" = "$($CustomerPrefix)-WVD";
             "vmImageType" = "CustomImage";
             "vmCustomImageSourceId" = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/Ucorp-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
+            "imageTags" = $Tags;
             "vmDiskType" = $VMDiskType;
             "vmUseManagedDisks" = $true;
             "existingVnetName" = $VNetName;
+            "networkInterfaceTags" = $Tags;
             "existingSubnetName" = $SubnetName;
             "virtualNetworkResourceGroupName" = $VNetResourceGroup;
             "createNetworkSecurityGroup" = $false;
+            "networkSecurityGroupTags" = $Tags;
             "virtualMachineTags" = $Tags;
             "hostpoolType" = "Pooled";
             "maxSessionLimit" = 8;
@@ -110,7 +116,7 @@ jobs:
           # Configuring WVD Application groups
           Update-AzWvdDesktop -ResourceGroupName $ResourceGroup -ApplicationGroupName "$HostPoolName-DAG" -Name SessionDesktop -FriendlyName "$CustomerPrefix Workspace"
           $ResourceIDHostPool = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -like $HostPoolName} | Select-Object -ExpandProperty ResourceID
-          New-AzWvdApplicationGroup -ResourceGroupName $ResourceGroup -Location "westeurope" -Name "$HostPoolName-RAG" -HostPoolArmPath $ResourceIDHostPool -ApplicationGroupType RemoteApp
+          New-AzWvdApplicationGroup -ResourceGroupName $ResourceGroup -Location "westeurope" -Name "$HostPoolName-RAG" -HostPoolArmPath $ResourceIDHostPool -ApplicationGroupType RemoteApp -Tag $Tags
 
           $ResourceIDDesktopGroup = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -eq "$HostPoolName-DAG"} | Select-Object -ExpandProperty ResourceID
           $ResourceIDRemoteAppGroup = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -eq "$HostPoolName-RAG"} | Select-Object -ExpandProperty ResourceID
