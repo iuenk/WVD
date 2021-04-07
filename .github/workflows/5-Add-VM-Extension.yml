@@ -108,15 +108,15 @@ jobs:
                 Write-Output "Skipping VM - Extension DependencyAgentWindows already installed"
               }
 
-              # Install Guest Health Windows Agent
-              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "GuestHealthWindowsAgent" -ErrorAction SilentlyContinue
-              if (-not $extensions){
-                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              }
-              Else
-              {
-                Write-Output "Skipping VM - Extension GuestHealthWindowsAgent already installed"
-              }
+              # Install Guest Health Windows Agent (not supported yet on Windows 10)
+              #$extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "GuestHealthWindowsAgent" -ErrorAction SilentlyContinue
+              #if (-not $extensions){
+              #  $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "GuestHealthWindowsAgent" -Publisher "Microsoft.Azure.Monitor.VirtualMachines.GuestHealth" -Type "GuestHealthWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+              #}
+              #Else
+              #{
+              #  Write-Output "Skipping VM - Extension GuestHealthWindowsAgent already installed"
+              #}
 
               # Install Optimalization Pack
               $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "OptimalizationPack" -ErrorAction SilentlyContinue
