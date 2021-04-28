@@ -4,7 +4,6 @@ on: workflow_dispatch
 env:
   STORAGE_ACCOUNT: "ucorpwvdstd"
   RESOURCE_GROUP: "ucorp-storage-rg"
-  SECURITY_GROUP: "SG_WVD_Users"
 
 jobs:
   build:
@@ -27,7 +26,6 @@ jobs:
           # BEWARE $StorageAccountName cannot be longer than 15 characters
           [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
-          [string]$SecurityGroup = [System.Environment]::GetEnvironmentVariable('SECURITY_GROUP')
 
           $Tags = @{"Environment"="WVD Production"}
 
