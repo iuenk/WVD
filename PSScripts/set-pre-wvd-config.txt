@@ -1,0 +1,59 @@
+#OneDrive
+https://go.microsoft.com/fwlink/?linkid=2083517
+.\OneDriveSetup.exe /allusers
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#Teams
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Teams\
+Name: IsWVDEnvironment
+Type: REG_DWORD
+Value: 1
+
+https://teams.microsoft.com/downloads/desktopurl?env=production&plat=windows&arch=x64&managedInstaller=true&download=true
+msiexec /i Teams_windows_x64.msi ALLUSERS=1 ALLUSER=1
+
+Install the WebRTC – Teams WebSocket Optimizations client
+https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4AQBt
+
+#Remove Teams as startup app
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#FSlogix
+Install_FSlogix.ps1
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#Datum/Tijd/Taal OS
+NL taalinstellen (zie https://docs.microsoft.com/nl-nl/azure/virtual-desktop/language-packs)
+Herstart nodig
+Pas tijdzone aan naar UTC +1
+
+#Taal Office
+NL proofing tools installeren vanuit Microsoft 365
+https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=languagepack&language=nl-nl&platform=x64&source=O16LAP&version=O16GA
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#MSIX app attach
+#Maakt het mounten van images mogelijk SeManageVolumePrivilege en geeft de tools om bestanden op te vragen van Azure file share onder system
+#Kopieer de PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec naar %Windir%\System32
+
+Maak in %Windir%\System32 een CMD bestand aan met de naam setPrivGpsvc en inhoud:
+sc privs gpsvc SeManageVolumePrivilege/SeTcbPrivilege/SeTakeOwnershipPrivilege/SeIncreaseQuotaPrivilege/SeAssignPrimaryTokenPrivilege/SeSecurityPrivilege/SeChangeNotifyPrivilege/SeCreatePermanentPrivilege/SeShutdownPrivilege/SeLoadDriverPrivilege/SeRestorePrivilege/SeBackupPrivilege/SeCreatePagefilePrivilege
+
+Open CMD als administrator en voer het volgende uit:
+psexec /s cmd
+setPrivGpsvc
+
+#MSIX app attach self-signed certificate opnemen in vertrouwde personen
+New-SelfSignedCertificate -Type Custom -Subject "CN=GSV" -KeyUsage DigitalSignature -KeyAlgorithm RSA -KeyLength 2048 -CertStoreLocation "cert:\LocalMachine\My"
+
+#Password Solvinity@GSV
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#Open CMD als Administrator
+cd %windir%\system32\sysprep
+sysprep.exe (OOBE, Generaliseren, Systeem afsluiten
