@@ -26,7 +26,7 @@ jobs:
           $SigImageDefName = "Ucorp-WVD-Image"
           $vmSize = "Standard_D4s_v3"
           $VaultName = "Ucorp-WVD-KV"
-          $NumberOfInstances = 2
+          $NumberOfInstances = 1
           
           # Retrieve the given Host Pool information
           try 
