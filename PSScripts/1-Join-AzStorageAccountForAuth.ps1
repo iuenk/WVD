@@ -29,7 +29,7 @@ Set-Location $path\
 .\CopyToPSPath.ps1 
 
 #Import AzFilesHybrid module
-Import-Module -Name AzFilesHybrid
+Import-Module .\AzFilesHybrid.psd1
 
 #Create ServicePrincipal Credential
 $ServicePrincipalCreds = New-Object System.Management.Automation.PSCredential($servicePrincipalApplicationID, (ConvertTo-SecureString $servicePrincipalPassword -AsPlainText -Force))
