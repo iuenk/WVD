@@ -10,81 +10,67 @@
     Research Links: 
 #>
 
-## Create Temporary Installation folder (for downloaded resources)
-$path ="c:\Install"
-mkdir $path -Force
+############################################## Create Temporary Installation folder (for downloaded resources) ##############################################
+New-Item -Path 'C:\Install' -ItemType Directory -Force | Out-Null
 
-$CustomerPrefix = "Ucorp"
-$TenantGUID = (get-aztenant).Id
+#Datum/Tijd/Taal OS
+NL taalinstellen (zie https://docs.microsoft.com/nl-nl/azure/virtual-desktop/language-packs)
+Herstart nodig
+Pas tijdzone aan naar UTC +1
 
+Ga naar Configuratiescherm, klik en regio, dan Land/regio en tablad Beheer: Instellingen kopieren. Selecteer Aanmeldingsscherm en systeemaccounts en Nieuwe gebruikersaccounts.
 
-## Configure OneDrive
-$OneDriveURL="https://go.microsoft.com/fwlink/?linkid=2083517"
-$OneDriveInstallerFile="OneDriveSetup.exe"
-$HKLMregistryPath = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive'
-$DiskSizeregistryPath = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive\DiskSpaceCheckThresholdMB'##Path to max disk size key
-$KFMSilentOptIn = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive'
+############################################## Disable Store auto update ##############################################
+Schtasks /Change /Tn "\Microsoft\Windows\WindowsUpdate\Automatic app update" /Disable
+Schtasks /Change /Tn "\Microsoft\Windows\WindowsUpdate\Scheduled Start" /Disable
 
-Invoke-WebRequest $OneDriveURL -OutFile $path\$OneDriveInstallerFile
-"$path\$OneDriveInstallerFile /allusers"
-
-# Wait till installation is completed
-Start-Sleep -Seconds 20
-
-IF(!(Test-Path $HKLMregistryPath))
-{New-Item -Path $HKLMregistryPath -Force}
-IF(!(Test-Path $DiskSizeregistryPath))
-{New-Item -Path $DiskSizeregistryPath -Force}
-New-ItemProperty -Path $HKLMregistryPath -Name 'SilentAccountConfig' -Value '1' -PropertyType DWORD -Force | Out-Null ##Enable silent account configuration
-New-ItemProperty -Path $DiskSizeregistryPath -Name $TenantGUID -Value '102400' -PropertyType DWORD -Force | Out-Null ##Set max OneDrive threshold before prompting
-New-ItemProperty -Path $KFMSilentOptIn -Name 'KFMSilentOptIn' -Value $TenantGUID -Force | Out-Null ##Silent redirect known folders to Onedrive
-
-
-## Configure FSlogix
-$fsLogixURL="https://aka.ms/fslogix_download"
-$installerFile="fslogix_download.zip"
-
-Try
-{
-    Invoke-WebRequest $fsLogixURL -OutFile $path\$installerFile
-    Expand-Archive $path\$installerFile -DestinationPath $path\fsLogix\extract
-    Start-Process -FilePath $path\fsLogix\extract\x64\Release\FSLogixAppsSetup.exe -Args "/install /quiet /norestart" -Wait
-    Write-Host "Fslogix Install Succeeded"
-    
+############################################## Configure OneDrive for All Users ##############################################
+# Uninstall Onedrive
+taskkill.exe /F /IM "OneDrive.exe"
+Write-Output "Remove OneDrive"
+if (Test-Path "$env:systemroot\System32\OneDriveSetup.exe") {
+    & "$env:systemroot\System32\OneDriveSetup.exe" /uninstall
 }
-Catch
-{
-    Write-Host "Fslogix Install Failed"
-    $ErrorMessage = $_.Exception.Message
-    Write-Host $ErrorMessage
-    $FailedItem = $_.Exception.ItemName
-    Write-Host $FailedItem
-} 
+if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
+    & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
+}
 
+# Install OneDrive (check if OneDrive link is still valid)
+Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkID=844652&clcid=0x413&culture=nl-nl&country=NL' -OutFile 'c:\Install\OneDriveSetup.exe'
+Invoke-Expression -Command 'C:\Install\OneDriveSetup.exe /allusers'
 
-## Configure Teams
-reg add "HKLM\SOFTWARE\Microsoft\Teams\" /v IsWVDEnvironment /t REG_DWORD /d 1 /f
-$TeamsURL = "https://teams.microsoft.com/downloads/desktopurl?env=production&plat=windows&arch=x64&managedInstaller=true&download=true"
-$TeamsInstaller = "Teams_windows_x64.msi"
-$WebRTCURL = "https://aka.ms/vs/16/release/vc_redist.x64.exe"
-$WebRTCInstaller = "vc_redist.x64.exe"
-
-Invoke-WebRequest $TeamsURL -OutFile $path\$TeamsInstaller
-Invoke-WebRequest $WebRTCURL -OutFile $path\$WebRTCInstaller 
-
-Start-Process msiexec.exe -Wait -ArgumentList '/I $path\Teams_windows_x64.msi OPTIONS="noAutoStart=true" ALLUSERS=1 ALLUSER=1'
+# Wait till installation of OneDrive is completed
 Start-Sleep -Seconds 20
 
-Start-Process -FilePath $path\vc_redist.x64.exe -Args "/quiet /norestart" -Wait
 
-#Disable auto-updates
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f
-#Time zone redirection
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fEnableTimeZoneRedirection /t REG_DWORD /d 1 /f
-#Disable Storage Sense
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy" /v 01 /t REG_DWORD /d 0 /f
+############################################## Install Teams ##############################################
+reg add "HKLM\SOFTWARE\Microsoft\Teams\" /v IsWVDEnvironment /t REG_DWORD /d 1 /f
+Invoke-WebRequest -Uri 'https://teams.microsoft.com/downloads/desktopurl?env=production&plat=windows&arch=x64&managedInstaller=true&download=true' -OutFile 'c:\Install\Teams_windows_x64.msi'
+Invoke-Expression -Command 'C:\Install\Teams_windows_x64.msi OPTIONS="noAutoStart=true" ALLUSERS=1 ALLUSER=1'
 
-# add MSIX app attach certificate
+# Wait till installation of Teams WebSocket Optimizations client is completed
+Start-Sleep -Seconds 20
+
+# Turn off auto start Teams
+
+Invoke-WebRequest -Uri 'https://aka.ms/vs/16/release/vc_redist.x64.exe' -OutFile 'c:\Install\vc_redist.x64.exe'
+Invoke-Expression -Command 'C:\Install\vc_redist.x64.exe /quiet /norestart'
+
+# Wait till installation of Teams WebSocket Optimizations client is completed
+Start-Sleep -Seconds 20
+
+############################################## Install M365 NL ##############################################
+Invoke-WebRequest -Uri 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=languagepack&language=nl-nl&platform=x64&source=O16LAP&version=O16GA' -OutFile 'c:\Install\OfficeSetup.exe'
+Invoke-Expression -Command 'C:\Install\OfficeSetup.exe'
+
+Start-Sleep -Seconds 180
+
+############################################## Add MSIX app attach certificate ##############################################
+Invoke-WebRequest -Uri 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/MSIXAppAttach.pfx?sp=r&st=2021-05-26T08:48:09Z&se=2023-05-26T16:48:09Z&spr=https&sv=2020-02-10&sr=b&sig=vs8O3TDPwthTVrn2CaZINgraNiYoZUPP1lIloXLOvQY%3D' -OutFile 'c:\Install\MSIXAppAttach.pfx'
+$mypwd = Get-Credential -UserName 'Enter password below'
+Import-PfxCertificate -FilePath 'C:\Install\MSIXAppAttach.pfx' -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password $mypwd.Password -Exportable
+
+
 
 #maakt het mounten van images mogelijk SeManageVolumePrivilege en geeft de tools om bestanden op te vragen van Azure file share onder system
 #Kopieer de PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec naar %Windir%\System32
@@ -95,13 +81,6 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\
 #Open CMD als administrator en voer het volgende uit:
 #psexec /s cmd
 #setPrivGpsvc
-
-#bloadware eraf
-
-# NL taalinstellingen
-#zie https://docs.microsoft.com/nl-nl/azure/virtual-desktop/language-packs)
-#Herstart nodig
-#Pas tijdzone aan naar UTC +1
 
 
 # SIG # Begin signature block
