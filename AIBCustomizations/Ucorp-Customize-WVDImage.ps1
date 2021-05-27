@@ -28,7 +28,7 @@ Schtasks /Change /Tn "\Microsoft\Windows\WindowsUpdate\Scheduled Start" /Disable
 # Uninstall Onedrive
 taskkill.exe /F /IM "OneDrive.exe"
 Write-Output "Remove OneDrive"
-}
+
 if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
     & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
 }
