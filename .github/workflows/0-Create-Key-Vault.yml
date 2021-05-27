@@ -40,11 +40,20 @@ jobs:
 
           $spid = (Get-AzADServicePrincipal -DisplayName $ServicePrincipalName).Id
 
-          New-AzKeyVault -Name $VaultName -ResourceGroupName $ResourceGroup -Location "westeurope" -Sku "standard" -Tag $Tags
-          Set-AzKeyVaultAccessPolicy -VaultName $VaultName -ObjectId $spid -PermissionsToSecrets get,set,delete,list
-          Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainadminuser" -SecretValue $domainadminuser
-          Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainadminpassword" -SecretValue $domainadminpassword
-          Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainname" -SecretValue $domainname
-          Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainoupath" -SecretValue $domainoupath
+          $status = Get-AzKeyVault -VaultName $VaultName
+          if ($status -eq $null){
+            New-AzKeyVault -Name $VaultName -ResourceGroupName $ResourceGroup -Location "westeurope" -Sku "standard" -Tag $Tags
+          }
+            Else {
+              while (-not (Get-AzKeyVault -VaultName $VaultName)){
+              sleep 5
+            }
+
+            Set-AzKeyVaultAccessPolicy -VaultName $VaultName -ObjectId $spid -PermissionsToSecrets get,set,delete,list
+            Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainadminuser" -SecretValue $domainadminuser
+            Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainadminpassword" -SecretValue $domainadminpassword
+            Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainname" -SecretValue $domainname
+            Set-AzKeyVaultSecret -VaultName $VaultName -Name "domainoupath" -SecretValue $domainoupath
+          }
         
         azPSVersion: 'latest'
