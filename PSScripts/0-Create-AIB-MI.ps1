@@ -2,8 +2,8 @@
 # Destination image resource group name
 $imageResourceGroup = 'Ucorp-WVD-RG'
 $identityName = "ucorp-aib-mi"
-# Azure region
-# Supported Regions East US, East US 2, West Central US, West US, West US 2, North Europe, West Europe
+$imageRoleDefName = "Azure Image Builder"
+
 # Get the subscription ID
 $subscriptionID = (Get-AzContext).Subscription.Id
 
@@ -25,8 +25,8 @@ $identityNamePrincipalId = (Get-AzUserAssignedIdentity -ResourceGroupName $image
 
 # Assign permissions for identity to distribute images
 # downloads a .json file with settings, update with subscription settings
-$myRoleImageCreationUrl = 'https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/12_Creating_AIB_Security_Roles/aibRoleImageCreation.json'
-$myRoleImageCreationPath = ".\myRoleImageCreation.json"
+$myRoleImageCreationUrl = 'https://raw.githubusercontent.com/iuenk/WVD/main/ARMTemplates/0-ARM-Create-AIB-MI.json'
+$myRoleImageCreationPath = ".\0-ARM-Create-AIB-MI.json"
 # Download the file
 Invoke-WebRequest -Uri $myRoleImageCreationUrl -OutFile $myRoleImageCreationPath -UseBasicParsing
 

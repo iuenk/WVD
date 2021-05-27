@@ -18,19 +18,19 @@ Invoke-Expression -Command 'C:\Install\npp.7.9.1.Installer.exe /S'
 Start-Sleep -Seconds 10
 
 # Install Acrobat Reader DC
-Invoke-WebRequest -Uri 'ftp://ftp.adobe.com/pub/adobe/reader/win/AcrobatDC/2001320064/AcroRdrDC2001320064_en_US.exe' -OutFile 'c:\Install\AcroRdrDC2001320064_en_US.exe'
-Invoke-Expression -Command 'C:\Install\AcroRdrDC2001320064_en_US.exe /sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES'
+#Invoke-WebRequest -Uri 'ftp://ftp.adobe.com/pub/adobe/reader/win/AcrobatDC/2001320064/AcroRdrDC2001320064_en_US.exe' -OutFile 'c:\Install\AcroRdrDC2001320064_en_US.exe'
+##Invoke-Expression -Command 'C:\Install\AcroRdrDC2001320064_en_US.exe /sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES'
 #Start-Process -FilePath "C:\Install\AcroRdrDC2001320064_en_US.exe" -ArgumentList "/sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES" #-Wait
 
 # Wait for Adobe Installer to finish
-Start-Sleep -Seconds 180
+#Start-Sleep -Seconds 180
 
 # Install Visual Studio Code
-Invoke-WebRequest -Uri 'https://az764295.vo.msecnd.net/stable/622cb03f7e070a9670c94bae1a45d78d7181fbd4/VSCodeSetup-x64-1.53.2.exe' -OutFile 'c:\Install\VSCodeSetup-x64-1.53.2.exe'
-Invoke-Expression -Command 'C:\Install\VSCodeSetup-x64-1.53.2.exe /VERYSILENT /NORESTART /MERGETASKS=!runcode'
+#Invoke-WebRequest -Uri 'https://az764295.vo.msecnd.net/stable/622cb03f7e070a9670c94bae1a45d78d7181fbd4/VSCodeSetup-x64-1.53.2.exe' -OutFile 'c:\Install\VSCodeSetup-x64-1.53.2.exe'
+#nvoke-Expression -Command 'C:\Install\VSCodeSetup-x64-1.53.2.exe /VERYSILENT /NORESTART /MERGETASKS=!runcode'
 
 # Wait for Visual Studio Code installer to finish
-Start-Sleep -Seconds 10
+#Start-Sleep -Seconds 10
 
 # SIG # Begin signature block
 # MIINHAYJKoZIhvcNAQcCoIINDTCCDQkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
