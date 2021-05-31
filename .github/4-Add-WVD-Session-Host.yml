@@ -27,9 +27,6 @@ jobs:
           $vmSize = "Standard_D4s_v3"
           $VaultName = "Ucorp-WVD-KV"
           $NumberOfInstances = 1
-          $VNetName = "Ucorp-vNet"
-          $SubnetName = "Ucorp-WVD-Subnet"
-          $VNetResourceGroup = "Ucorp-Network-RG"
           
           # Retrieve the given Host Pool information
           try 
@@ -49,9 +46,6 @@ jobs:
             try
             {
               $sessionHost = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG) | Select-Object -Last 1
-              if($sessionHost -eq $null){
-              $sessionHost = "$CustomerPrefix-WVD-0"
-              }
             }
             catch
             {
@@ -61,15 +55,15 @@ jobs:
 
             # Determine new Session Host number
             $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
-            if($sessionHostNumber -eq $null){
+            $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
+            if($sessionHostNumber -eq $null)
+            {
               $vmInitialNumber = 0
             }
             Else {
-            $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
+              $lastSessionHostNumber = [int]($sessionHostNumber)
+              $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
             }
-            
-            $lastSessionHostNumber = [int]($sessionHostNumber)
-            $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
 
             $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
 
@@ -83,6 +77,14 @@ jobs:
             $domainAdminUser = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainAdminUser)))
             $domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
             $ouPath = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureOuPath)))
+                      
+            # Retrieve the vNet and subnet information of the VM
+            $sessionHostName = $($sessionHost.Name.Split("/")[1].Split(".")[0])
+            $sessionHostRG = (Get-AzVM -Name $sessionHostName).ResourceGroupName
+            $sessionHostLocation = (Get-AzVM -Name $sessionHostName).Location
+            $vnetInfo = (Get-AzNetworkInterface -ResourceGroupName $sessionHostRG | where {$_.Name -like "$($sessionHostName)*"}).IpConfigurations[0].Subnet.id.Split("/")[8]
+            $subnetInfo = (Get-AzNetworkInterface -ResourceGroupName $sessionHostRG | where {$_.Name -like "$($sessionHostName)*"}).IpConfigurations[0].Subnet.id.Split("/")[10]
+            $vnetrgInfo = (Get-AzNetworkInterface -ResourceGroupName $sessionHostRG | where {$_.Name -like "$($sessionHostName)*"}).IpConfigurations[0].Subnet.id.Split("/")[4]
             
             # Retrieve Hostpool token
             $registrationInfo = Get-AzWvdRegistrationInfo -SubscriptionId ${{secrets.AZURE_SUBSCRIPTIONID}} -ResourceGroupName $($hostpoolRG) -HostPoolName $($hostpoolName)
@@ -104,8 +106,8 @@ jobs:
               "hostpoolLocation" = $($hostPool.Location);
               "createAvailabilitySet" = $false;
               "vmInitialNumber" = $vmInitialNumber;
-              "vmResourceGroup" = $($ResourceGroup);
-              "vmLocation" = "westeurope";
+              "vmResourceGroup" = $($sessionHostRG);
+              "vmLocation" = $($sessionHostLocation);
               "vmSize" = $vmSize;
               "vmNumberOfInstances" = $NumberOfInstances;
               "vmNamePrefix" = $($vmTemplate.namePrefix);
@@ -113,9 +115,9 @@ jobs:
               "vmImageVhdUri" = [string]$($vmTemplate.imageUri);
               "vmDiskType" = $($vmTemplate.osDiskType);
               "vmUseManagedDisks" = $($vmTemplate.useManagedDisks);
-              "existingVnetName" = $($VNetName);
-              "existingSubnetName" = $($SubnetName);
-              "virtualNetworkResourceGroupName" = $($VNetResourceGroup);
+              "existingVnetName" = $($vnetInfo);
+              "existingSubnetName" = $($subnetInfo);
+              "virtualNetworkResourceGroupName" = $($vnetrgInfo);
               "createNetworkSecurityGroup" = $false;
               "virtualMachineTags" = $Tags;
               "apiVersion" = "2019-12-10-preview";
