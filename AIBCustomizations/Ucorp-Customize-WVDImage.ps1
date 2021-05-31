@@ -64,12 +64,10 @@ Start-Sleep -Seconds 300
 Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile 'c:\Install\GSV-MSIX.pfx'
 Import-PfxCertificate -FilePath 'C:\Install\GSV-MSIX.pfx' -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Solvinity@GSV' -AsPlainText -Force) -Exportable
 
+
+############################################## MSIX app attach mounten ##############################################
 #maakt het mounten van images mogelijk SeManageVolumePrivilege en geeft de tools om bestanden op te vragen van Azure file share onder system
 #Kopieer de PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec naar %Windir%\System32
-
-#Maak in %Windir%\System32 een CMD bestand aan met de naam setPrivGpsvc en inhoud:
-#sc privs gpsvc SeManageVolumePrivilege/SeTcbPrivilege/SeTakeOwnershipPrivilege/SeIncreaseQuotaPrivilege/SeAssignPrimaryTokenPrivilege/SeSecurityPrivilege/SeChangeNotifyPrivilege/SeCreatePermanentPrivilege/SeShutdownPrivilege/SeLoadDriverPrivilege/SeRestorePrivilege/SeBackupPrivilege/SeCreatePagefilePrivilege
-
-#Open CMD als administrator en voer het volgende uit:
-#psexec /s cmd
-#setPrivGpsvc
+# Add MSIX storage account credentials as system needed to mount packages at session hosts
+$PSExecString = "C:\Windows\System32\PsExec.exe -s -accepteula -nobanner cmdkey /add:gsvwvdstd.file.core.windows.net /user:AZURE\gsvwvdstd /pass:jK/NDsy0oa7zrK8mDmhks0s+sTtD1nAqDppKFDXL0cmKbo7xYTdUK/YkXTPn3Q/X1AxbmRZC2jo8FFrwMM4qNQ=="
+Invoke-Expression -Command ("$PSExecString")
