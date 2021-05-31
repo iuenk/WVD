@@ -66,9 +66,9 @@ jobs:
               $vmInitialNumber = 0
             }
             Else {
-            $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
-            $lastSessionHostNumber = [int]($sessionHostNumber)
-            $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
+              $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
+              $lastSessionHostNumber = [int]($sessionHostNumber)
+              $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
             }
 
             $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
