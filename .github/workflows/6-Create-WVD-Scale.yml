@@ -72,3 +72,6 @@ jobs:
           New-AzRoleAssignment -ObjectId $functionsAppNameId -RoleDefinitionName "Contributor" -ResourceGroupName $ResourceGroup
           
         azPSVersion: 'latest'
+
+
+        Maak eerst via application insights een workspace aan en koppel deze aan log analytics workspace. Anders maakt het een nieuwe resourcegroup en log analytics workspace.

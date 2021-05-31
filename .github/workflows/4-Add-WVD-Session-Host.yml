@@ -26,7 +26,7 @@ jobs:
           $SigImageDefName = "Ucorp-WVD-Image"
           $vmSize = "Standard_D4s_v3"
           $VaultName = "Ucorp-WVD-KV"
-          $NumberOfInstances = 1
+          $NumberOfInstances = 2
           $ResourceGroup = "Ucorp-WVD-RG"
           $VNetName = "Ucorp-vNet"
           $SubnetName = "Ucorp-WVD-Subnet"
@@ -67,10 +67,9 @@ jobs:
             }
             Else {
             $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
-            }
-            
             $lastSessionHostNumber = [int]($sessionHostNumber)
             $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
+            }
 
             $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
 
