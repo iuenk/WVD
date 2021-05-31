@@ -28,7 +28,7 @@ jobs:
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "Ucorp-WVD-KV"
           $HostPoolName = "Ucorp-WVD-Pool"
-          $NumberOfInstances = 1
+          $NumberOfInstances = 0
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
           $Ram = "16"
