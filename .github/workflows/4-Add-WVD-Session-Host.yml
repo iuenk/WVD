@@ -96,6 +96,7 @@ jobs:
             {
               $hostpoolToken = $((New-AzWvdRegistrationInfo -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -ExpirationTime $((Get-Date).ToUniversalTime().AddDays(1).ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ'))).Token)
             }
+            
             ## Create a Template Parameter Object (hashtable)
             $objTemplateParameter = @{
               "hostpoolName" = $HostPoolName;
