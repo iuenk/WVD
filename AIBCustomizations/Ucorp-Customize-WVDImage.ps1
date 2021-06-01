@@ -69,5 +69,5 @@ Import-PfxCertificate -FilePath 'C:\Install\GSV-MSIX.pfx' -CertStoreLocation 'Ce
 #maakt het mounten van images mogelijk SeManageVolumePrivilege en geeft de tools om bestanden op te vragen van Azure file share onder system
 #Kopieer de PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec naar %Windir%\System32
 # Add MSIX storage account credentials as system needed to mount packages at session hosts
-$PSExecString = "C:\Windows\System32\PsExec.exe -s -accepteula -nobanner cmdkey /add:gsvwvdstd.file.core.windows.net /user:AZURE\gsvwvdstd /pass:jK/NDsy0oa7zrK8mDmhks0s+sTtD1nAqDppKFDXL0cmKbo7xYTdUK/YkXTPn3Q/X1AxbmRZC2jo8FFrwMM4qNQ=="
+$PSExecString = "C:\Windows\System32\PsExec.exe -s -accepteula -nobanner cmdkey /add:gsvwvdstd.file.core.windows.net /user:AZURE\storageaccount /pass:wachtwoord"
 Invoke-Expression -Command ("$PSExecString")
