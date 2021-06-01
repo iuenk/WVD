@@ -75,3 +75,6 @@ jobs:
 
 
         Maak eerst via application insights een workspace aan en koppel deze aan log analytics workspace. Anders maakt het een nieuwe resourcegroup en log analytics workspace.
+        If you go to the function App, App Files and select requirments.pd1, there should be a line ‘Az’ = ‘5.*’.  that line adds the module.
+
+        Modules kan je installeren via Automation en dan Modules: Az.Account en Az.DesktopVirtualization
