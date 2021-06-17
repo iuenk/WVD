@@ -59,10 +59,17 @@ Invoke-WebRequest -Uri 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?P
 Invoke-Expression -Command 'C:\Install\OfficeSetup.exe'
 Start-Sleep -Seconds 300
 
+############################################## Install Citrix Workspace App ##############################################
+
 
 ############################################## Add MSIX app attach certificate ##############################################
 Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile 'c:\Install\GSV-MSIX.pfx'
 Import-PfxCertificate -FilePath 'C:\Install\GSV-MSIX.pfx' -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Solvinity@GSV' -AsPlainText -Force) -Exportable
+
+############################################## Set File Type Associations ##############################################
+Dism.exe /Online /Import-DefaultAppAssociations:C:\DefaultAssoc.xml
+https://raw.githubusercontent.com/iuenk/WVD/main/asdasdasd
+
 
 
 ############################################## MSIX app attach mounten ##############################################
