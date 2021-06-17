@@ -61,6 +61,9 @@ Start-Sleep -Seconds 300
 
 ############################################## Install Citrix Workspace App ##############################################
 
+Invoke-WebRequest -Uri 'https://downloads.citrix.com/19445/CitrixWorkspaceApp.exe?__gda__=1623830445_dbd7a1bbcf08d0257e96371d958c06d3' -OutFile 'c:\Packages\CitrixWorkspaceApp.exe'
+Invoke-Expression -Command 'C:\Packages\CitrixWorkspaceApp.exe /silent /forceinstall /includeSSON /ENABLE_SSON=Yes /ALLOWSAVEPWD=A /ALLOWADDSTORE=A /AutoUpdateCheck=disabled /noreboot'
+Start-Sleep -Seconds 300
 
 ############################################## Add MSIX app attach certificate ##############################################
 Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile 'c:\Install\GSV-MSIX.pfx'
