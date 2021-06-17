@@ -36,7 +36,7 @@ jobs:
           $domainadminuser = ConvertTo-SecureString ${{secrets.AZURE_USERNAME}} -AsPlainText -Force
           $domainadminpassword = ConvertTo-SecureString ${{secrets.AZURE_PASSWORD}} -AsPlainText -Force
           $domainname = ConvertTo-SecureString "ucorp.local" -AsPlainText -Force
-          $domainoupath = ConvertTo-SecureString "OU=WVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force 
+          $domainoupath = ConvertTo-SecureString "OU=AVD,OU=Ucorp,DC=ucorp,DC=local" -AsPlainText -Force 
 
           $spid = (Get-AzADServicePrincipal -DisplayName $ServicePrincipalName).Id
 
