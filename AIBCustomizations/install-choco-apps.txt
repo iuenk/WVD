@@ -1,0 +1,38 @@
+$RegCheck = 'DefaultApps'
+$version = 1
+$RegRoot= "HKLM"
+if (Test-Path "$RegRoot`:\Software\GSV") {
+    try{
+        $regexist = Get-ItemProperty "$RegRoot`:\Software\GSV" -Name $RegCheck -ErrorAction Stop
+    }catch{
+        $regexist = $false
+    }
+} 
+else {
+    New-Item "$RegRoot`:\Software\GSV"
+}    
+if ((!($regexist)) -or ($regexist.$RegCheck -lt $Version)) {
+    try{
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
+
+        choco install adobereader -params '"/NoUpdates"' -y
+
+        $location = "C:\Users\Public\Desktop\"
+        if(Test-Path $location){
+            #Remove-Item "$location\*"
+        }
+        else{
+            Write-Output "Directory does not exist"
+        }
+    }catch{
+        write-errror 'unable to install default choco apps'
+        break 
+    }
+
+    if(!($regexist)){
+        New-ItemProperty "$RegRoot`:\Software\GSV" -Name $RegCheck -Value $Version -PropertyType string
+    }else{
+        Set-ItemProperty "$RegRoot`:\Software\GSV" -Name $RegCheck -Value $version
+    }
+}
