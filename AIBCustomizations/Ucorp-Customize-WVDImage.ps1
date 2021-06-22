@@ -103,24 +103,24 @@ foreach ($Font in Get-ChildItem -Path $FontFolder -File) {
 
 #Set Wallpaper
 $WallpaperUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/Ucorp-Wallpaper.jpg?sp=r&st=2021-06-22T15:20:46Z&se=2023-06-22T23:20:46Z&spr=https&sv=2020-02-10&sr=b&sig=hqcH6QFr7QK2uWRr6H8%2FBlLXdO1EVB8uPUSlSJ8EjU4%3D'
-$WallpaperLocation = 'C:\Windows\Web\Wallpaper\GSV-Wallpaper.jpg'
+$WallpaperLocation = 'C:\Windows\Web\Wallpaper\Ucorp-Wallpaper.jpg'
 Invoke-WebRequest -Uri $WallpaperUrl -OutFile $WallpaperLocation
 
 
 ### Add MSIX app attach certificate ###
-Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile "$path\GSV-MSIX.pfx"
-Import-PfxCertificate -FilePath "$path\GSV-MSIX.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'wachtwoord' -AsPlainText -Force) -Exportable
+Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile "$path\MSIXAppAttach.pfx"
+Import-PfxCertificate -FilePath "$path\MSIXAppAttach.pfx.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Zwemmen1!' -AsPlainText -Force) -Exportable
 
 
 ### MSIX app attach mounten ###
 # Add MSIX storage account credentials as system needed to mount packages at session hosts
-$PsExecUrl = "https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/PsExec.zip?sp=r&st=2021-06-21T11:15:11Z&se=2023-06-21T19:15:11Z&spr=https&sv=2020-02-10&sr=b&sig=Jt7PIj555wfNCdb0QPkraJo7rd6QhotT36wHnHdMWVw%3D"
-$PsExecfile = "PsExec.zip"
+$PsExecUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/PsExec.zip?sp=r&st=2021-06-22T20:17:10Z&se=2023-06-23T04:17:10Z&spr=https&sv=2020-02-10&sr=b&sig=U1nmgyKXmBRXY6XjxT3%2BGbIkanrE1O30RERqv7EtsG4%3D'
+$PsExecfile = 'PsExec.zip'
 
 Invoke-WebRequest $PsExecUrl -OutFile $path\$PsExecfile
 Expand-Archive $path\$PsExecfile -DestinationPath "C:\Windows\System32" -Force
 
-$PSExecString = "C:\Windows\System32\PsExec.exe -s -accepteula -nobanner cmdkey /add:gsvwvdstd.file.core.windows.net /user:AZURE\gsvwvdstd /pass:jK/NDsy0oa7zrK8mDmhks0s+sTtD1nAqDppKFDXL0cmKbo7xYTdUK/YkXTPn3Q/X1AxbmRZC2jo8FFrwMM4qNQ=="
+$PSExecString = "C:\Windows\System32\PsExec.exe -s -accepteula -nobanner cmdkey /add:ucorpwvdstd.file.core.windows.net /user:AZURE\ucorpwvdstd /pass:DwtWjATH93vYsarh9SRnbLa+dCTy6w5XeC4xq088PfX2gjB6cYbe7pwdMnK5as7IfunAcb9jzdFwjDzc2W1wRA=="
 Invoke-Expression -Command ("$PSExecString")
 
 
@@ -146,7 +146,7 @@ Set-ItemProperty -Path $Key -Name $AttrName -Value ([byte[]]$hexified) -verbose 
 
 ### Install Microsoft 365 Apps with customization ###
 Invoke-WebRequest -Uri 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=languagepack&language=nl-nl&platform=x64&source=O16LAP&version=O16GA' -OutFile 'C:\Install\OfficeSetup.exe'
-Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/OfficeConfiguration.xml?sp=r&st=2021-06-21T14:26:21Z&se=2023-06-21T22:26:21Z&spr=https&sv=2020-02-10&sr=b&sig=jxbzbQeFEX2cmt3qXPp505T%2BDtNMi4gqMEw0ftu6mos%3D' -OutFile 'C:\Install\OfficeConfiguration.xml'
+Invoke-WebRequest -Uri 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/OfficeConfiguration.xml?sp=r&st=2021-06-22T20:23:20Z&se=2023-06-23T04:23:20Z&spr=https&sv=2020-02-10&sr=b&sig=G2Tj5AUlse1%2BUmAvWYAhzHozIbdcrW6PgWWUgSX75Jk%3D' -OutFile 'C:\Install\OfficeConfiguration.xml'
 
 Invoke-Expression -command 'C:\Install\OfficeSetup.exe /configure OfficeConfiguration.xml'
 Start-Sleep -Seconds 300
@@ -167,15 +167,3 @@ $P = New-ScheduledTaskPrincipal -UserId 'system'
 $S = New-ScheduledTaskSettingsSet -StartWhenAvailable
 $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
 Register-ScheduledTask  -TaskName "$TaskFolder\$TaskName" -InputObject $D -ErrorAction SilentlyContinue
-
-
-############################################## Install Citrix Workspace App ##############################################
-
-Invoke-WebRequest -Uri 'https://downloads.citrix.com/19445/CitrixWorkspaceApp.exe?__gda__=1623830445_dbd7a1bbcf08d0257e96371d958c06d3' -OutFile 'C:\Install\CitrixWorkspaceApp.exe'
-Invoke-Expression -Command 'C:\Packages\CitrixWorkspaceApp.exe /silent /forceinstall /includeSSON /ENABLE_SSON=Yes /ALLOWSAVEPWD=A /ALLOWADDSTORE=A /AutoUpdateCheck=disabled /noreboot'
-Start-Sleep -Seconds 300
-
-
-### Remove Microsoft Monitoring Agent ###
-(Get-WMIObject -Classname Win32_Product | Where-Object Name -Match  'Microsoft Monitoring Agent').Uninstall()
-Start-Sleep -Seconds 10
