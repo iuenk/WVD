@@ -25,18 +25,19 @@ Schtasks /Change /Tn "\Microsoft\Windows\WindowsUpdate\Scheduled Start" /Disable
 
 
 ############################################## Configure OneDrive for All Users ##############################################
+### Configure OneDrive for All Users (is al geinstalleerd voor all users) ###
 # Uninstall Onedrive
-taskkill.exe /F /IM "OneDrive.exe"
-Write-Output "Remove OneDrive"
+#taskkill.exe /F /IM "OneDrive.exe"
+#$OneDriveUninstall = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OneDriveSetup.exe" -Name "UninstallString" -ErrorAction SilentlyContinue
 
-if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
-    & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
-}
+#if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
+#    & "$OneDriveUninstall.UninstallString"
+#}
 
 # Install OneDrive (check if OneDrive link is still valid)
-Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkID=844652&clcid=0x413&culture=nl-nl&country=NL' -OutFile 'c:\Install\OneDriveSetup.exe'
-Invoke-Expression -Command 'C:\Install\OneDriveSetup.exe /allusers'
-Start-Sleep -Seconds 20
+#Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkID=844652&clcid=0x413&culture=nl-nl&country=NL' -OutFile '$path\OneDriveSetup.exe'
+#Invoke-Expression -Command '$path\OneDriveSetup.exe /allusers'
+#Start-Sleep -Seconds 20
 
 
 ############################################## Install Teams ##############################################
