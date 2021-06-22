@@ -27,7 +27,7 @@ jobs:
           [string]$storageAccountName = [System.Environment]::GetEnvironmentVariable('STORAGE_ACCOUNT')
           [string]$ResourceGroup = [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP')
 
-          $Tags = @{"Environment"="WVD Production"}
+          $Tags = @{"Environment"="PRD"}
 
           # Create the resource group if needed
           try {

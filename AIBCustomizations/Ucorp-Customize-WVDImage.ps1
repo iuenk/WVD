@@ -23,7 +23,7 @@ Schtasks /Change /Tn "\Microsoft\Windows\WindowsUpdate\Scheduled Start" /Disable
 #https://docs.microsoft.com/nl-nl/azure/virtual-desktop/language-packs, https://mscloud.be/azure/powershell/configure-regional-settings-and-windows-locales-on-azure-virtual-machines/)
 
 $lp_root_folder = "$path\Language" #Root folder where the copied sourcefiles are
-$LanguageUrl = 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/Configure-NL-Language.zip?sp=r&st=2021-06-22T13:26:13Z&se=2023-06-22T21:26:13Z&spr=https&sv=2020-02-10&sr=b&sig=3fes%2FKty8JZdO1wAWSlfLoeBVcY9pDEJiL%2BukYkIA7M%3D'
+$LanguageUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/Configure-NL-Language.zip?sp=r&st=2021-06-22T15:19:51Z&se=2023-06-22T23:19:51Z&spr=https&sv=2020-02-10&sr=b&sig=wkgATIu6nMrdYBVHAFdRBWmVquuMGvpB6LmjxYkGAEY%3D'
 $architecture = "x64" #Architecture of cab files
 $systemlocale = "nl-NL" #System local when script finishes
 $Languagefiles = "Configure-NL-Language.zip"
@@ -85,7 +85,7 @@ Start-Process "C:\$lp_root_folder\DefaultLanguageSettings.bat"
 
 ### Set Wallpaper en Fonts ###
 #Set Fonts
-$FontUrl = 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/Font.zip?sp=r&st=2021-06-21T11:10:07Z&se=2023-06-21T19:10:07Z&spr=https&sv=2020-02-10&sr=b&sig=5wABn6fXYoUZ5kScQmStEg1Ve2biASIxA1fmm4iKH2s%3D'
+$FontUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/Font.zip?sp=r&st=2021-06-22T15:22:16Z&se=2023-06-22T23:22:16Z&spr=https&sv=2020-02-10&sr=b&sig=GjOb1dGTd%2Fg8ebwiX72ZNHmomYho0R5XjW5rgFnHzLQ%3D'
 $FontFile = "Font.zip"
 Invoke-WebRequest $FontUrl -OutFile $path\$FontFile
 Expand-Archive "$path\$FontFile" -DestinationPath $path
@@ -102,14 +102,14 @@ foreach ($Font in Get-ChildItem -Path $FontFolder -File) {
 }
 
 #Set Wallpaper
-$WallpaperUrl = 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-Wallpaper.jpg?sp=r&st=2021-06-21T11:11:14Z&se=2023-06-21T19:11:14Z&spr=https&sv=2020-02-10&sr=b&sig=jy%2BD01m8TTwoCu0cVmtBrBsiNl3yQ1uc0kxFNtyUHVI%3D'
+$WallpaperUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/Ucorp-Wallpaper.jpg?sp=r&st=2021-06-22T15:20:46Z&se=2023-06-22T23:20:46Z&spr=https&sv=2020-02-10&sr=b&sig=hqcH6QFr7QK2uWRr6H8%2FBlLXdO1EVB8uPUSlSJ8EjU4%3D'
 $WallpaperLocation = 'C:\Windows\Web\Wallpaper\GSV-Wallpaper.jpg'
 Invoke-WebRequest -Uri $WallpaperUrl -OutFile $WallpaperLocation
 
 
 ### Add MSIX app attach certificate ###
 Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile "$path\GSV-MSIX.pfx"
-Import-PfxCertificate -FilePath "$path\GSV-MSIX.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Solvinity@GSV' -AsPlainText -Force) -Exportable
+Import-PfxCertificate -FilePath "$path\GSV-MSIX.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'wachtwoord' -AsPlainText -Force) -Exportable
 
 
 ### MSIX app attach mounten ###

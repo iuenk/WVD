@@ -19,7 +19,7 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          $Tags = @{"Environment"="WVD Production"}
+          $Tags = @{"Environment"="PRD"}
           $HostPoolName = "Ucorp-WVD-Pool"
           $ResourceGroup = "Ucorp-Logging-RG"
           $WorkspaceName = "Ucorp-WVD-LAW"

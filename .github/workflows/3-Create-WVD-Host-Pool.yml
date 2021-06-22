@@ -19,7 +19,7 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          $Tags = @{"Environment"="WVD Production"; "Maintenance"="Thursday"}
+          $Tags = @{"Environment"="PRD"; "Maintenance"="Thursday"}
           $CustomerPrefix = "Ucorp"
           $ResourceGroup = "Ucorp-WVD-RG"
           $Sig = "ucorpwvdsig" 

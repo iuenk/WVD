@@ -19,7 +19,7 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          $Tags = @{"Environment"="WVD Production"; "Maintenance"="Thursday"}
+          $Tags = @{"Environment"="PRD"; "Maintenance"="Thursday"}
           $CustomerPrefix = "Ucorp"
           $HostPoolName = "Ucorp-WVD-Pool" 
           $Sig = "ucorpwvdsig"
@@ -63,7 +63,7 @@ jobs:
             # Determine new Session Host number
             $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
             if($sessionHostNumber -eq $null){
-              $vmInitialNumber = 0
+              $vmInitialNumber = -1 + $NumberOfInstances
             }
             Else {
               $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")

@@ -20,7 +20,7 @@ jobs:
       with:
         inlineScript: |
           # Read the environment variables in PowerShell
-          $Tags = @{"Environment"="WVD Production"}
+          $Tags = @{"Environment"="PRD"}
           $ServicePrincipalName = "githubactionazure"
           $ResourceGroup = "Ucorp-Vault-RG"
           $VaultName = "Ucorp-WVD-KV"
