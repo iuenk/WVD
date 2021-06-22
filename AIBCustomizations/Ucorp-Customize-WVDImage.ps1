@@ -167,3 +167,7 @@ $P = New-ScheduledTaskPrincipal -UserId 'system'
 $S = New-ScheduledTaskSettingsSet -StartWhenAvailable
 $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
 Register-ScheduledTask  -TaskName "$TaskFolder\$TaskName" -InputObject $D -ErrorAction SilentlyContinue
+
+Start-Sleep -Seconds 10
+
+Restart-Computer -Force
