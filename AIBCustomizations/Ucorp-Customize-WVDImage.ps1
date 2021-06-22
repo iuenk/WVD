@@ -153,7 +153,7 @@ Start-Sleep -Seconds 300
 
 
 ### Configure Chocolatey ###
-$TaskFolder = 'GSV'
+$TaskFolder = 'Ucorp'
 $TaskName = 'UpdateChocoApps'
 
 Set-ExecutionPolicy Bypass -Scope Process -Force
