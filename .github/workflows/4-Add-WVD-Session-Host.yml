@@ -62,7 +62,7 @@ jobs:
 
             # Determine new Session Host number
             $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
-            if($sessionHostNumber -eq $null){
+            if($SessionHost -eq $null){
               $vmInitialNumber = -1 + $NumberOfInstances
             }
             Else {
