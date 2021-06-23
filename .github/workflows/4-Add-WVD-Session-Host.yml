@@ -156,6 +156,18 @@ jobs:
             # ARM Template file
             ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
             New-AzResourceGroupDeployment -ResourceGroupName $hostpoolRG -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Verbose
+          
+            # Place new Session Hosts in maintenance
+            $newSessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $hostpoolRG | Select-Object -Last $NumberOfInstances
+            Foreach($newSessionHost in $newSessionHosts){
+              $InputString = $newSessionhost.Name
+              $WVDArray = $InputString.Split("/")
+              $WVDArray[0]
+              $WVDArray[1]
+
+                Write-host Disabling new sessions for session host: $WVDArray[1]
+                Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $WVDArray[1] -AllowNewSession:$false
+            }
           }
 
         azPSVersion: 'latest'

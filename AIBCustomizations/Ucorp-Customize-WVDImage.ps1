@@ -81,7 +81,7 @@ For ($i = 0; $i -ne $installed_lp.Count; $i++) {
 }
 
 #Set for new user accounts
-Start-Process "C:\$lp_root_folder\DefaultLanguageSettings.bat"
+Start-Process "$lp_root_folder\DefaultLanguageSettings.bat"
 
 ### Set Wallpaper en Fonts ###
 #Set Fonts
@@ -108,11 +108,11 @@ Invoke-WebRequest -Uri $WallpaperUrl -OutFile $WallpaperLocation
 
 
 ### Add MSIX app attach certificate ###
-Invoke-WebRequest -Uri 'https://gsvwvdstd.blob.core.windows.net/gsvwvdrepo/GSV-MSIX.pfx?sp=r&st=2021-05-27T20:35:26Z&se=2025-05-28T04:35:26Z&spr=https&sv=2020-02-10&sr=b&sig=ov5DcGkwTmkAdSt2b8W77Ne5LCd1IJP5rxbquexcLdU%3D' -OutFile "$path\MSIXAppAttach.pfx"
-Import-PfxCertificate -FilePath "$path\MSIXAppAttach.pfx.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Zwemmen1!' -AsPlainText -Force) -Exportable
+Invoke-WebRequest -Uri 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/MSIXAppAttach.pfx?sp=r&st=2021-06-23T08:31:52Z&se=2023-06-23T16:31:52Z&spr=https&sv=2020-02-10&sr=b&sig=t%2Bgow6n4VkK%2B06%2FL6Lmv%2FkH0BPBqhOMDO5TaAlcXFhg%3D' -OutFile "$path\MSIXAppAttach.pfx"
+Import-PfxCertificate -FilePath "$path\MSIXAppAttach.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Welkom01!' -AsPlainText -Force) -Exportable
 
 
-### MSIX app attach mounten ###
+### MSIX app attach mounten ### (gaat nog niet goed)
 # Add MSIX storage account credentials as system needed to mount packages at session hosts
 $PsExecUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/PsExec.zip?sp=r&st=2021-06-22T20:17:10Z&se=2023-06-23T04:17:10Z&spr=https&sv=2020-02-10&sr=b&sig=U1nmgyKXmBRXY6XjxT3%2BGbIkanrE1O30RERqv7EtsG4%3D'
 $PsExecfile = 'PsExec.zip'
@@ -141,15 +141,16 @@ $Key = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved
 $CustomInput = "11,00,00,00,c0,bb,ab,a4,9a,66,d7,01"
 $hexified = $CustomInput.Split(',') | ForEach-Object { "0x$_"}
 $AttrName = "Teams"
-Set-ItemProperty -Path $Key -Name $AttrName -Value ([byte[]]$hexified) -verbose -ErrorAction 'Stop'
+New-Item -Path $Key -Force
+New-ItemProperty -Path $Key -Name $AttrName -Value ([byte[]]$hexified) -verbose -ErrorAction 'Stop'
 
 
 ### Install Microsoft 365 Apps with customization ###
 Invoke-WebRequest -Uri 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=languagepack&language=nl-nl&platform=x64&source=O16LAP&version=O16GA' -OutFile 'C:\Install\OfficeSetup.exe'
 Invoke-WebRequest -Uri 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/OfficeConfiguration.xml?sp=r&st=2021-06-22T20:23:20Z&se=2023-06-23T04:23:20Z&spr=https&sv=2020-02-10&sr=b&sig=G2Tj5AUlse1%2BUmAvWYAhzHozIbdcrW6PgWWUgSX75Jk%3D' -OutFile 'C:\Install\OfficeConfiguration.xml'
 
-Invoke-Expression -command 'C:\Install\OfficeSetup.exe /configure OfficeConfiguration.xml'
-Start-Sleep -Seconds 300
+Invoke-Expression -command 'C:\Install\OfficeSetup.exe /configure C:\Install\OfficeConfiguration.xml'
+Start-Sleep -Seconds 600
 
 
 ### Configure Chocolatey ###
@@ -167,7 +168,3 @@ $P = New-ScheduledTaskPrincipal -UserId 'system'
 $S = New-ScheduledTaskSettingsSet -StartWhenAvailable
 $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
 Register-ScheduledTask  -TaskName "$TaskFolder\$TaskName" -InputObject $D -ErrorAction SilentlyContinue
-
-Start-Sleep -Seconds 10
-
-Restart-Computer -Force
