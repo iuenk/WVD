@@ -67,9 +67,7 @@ $hostPoolName = 'Ucorp-WVD-Pool'
 # Host Pool Resource Group and the resource group of the Session host VM's.
 $hostPoolRg = 'Ucorp-WVD-RG'
 $sessionHostVmRg= 'Ucorp-WVD-RG'
-
-$secureDomainName = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainname).SecretValue
-$domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
+$domainName = 'intern.stichtsevecht.nl'
 
 ############## Functions ####################
 
@@ -118,7 +116,7 @@ function Stop-SessionHost {
         $hostsToStop
     )
     # Get computers running with no users
-    $emptyHosts = $sessionHosts | Where-Object { $_.Session -eq 0 -and $_.Status -eq 'Available' -and $_.Name -notin $VMs }
+    $emptyHosts = $sessionHosts | Where-Object { $_.Session -eq 0 -and $_.Status -eq 'Available' }
     $emptyHostsCount = $emptyHosts.count
     Write-Verbose "Evaluating servers to shut down"
 
@@ -209,7 +207,7 @@ Write-Verbose $maxSession
 # Find the total number of session hosts
 # Exclude servers in drain mode and do not allow new connections
 try {
-    $sessionHosts = Get-AzWvdSessionHost -ResourceGroupName $hostPoolRg -HostPoolName $hostPoolName | Where-Object { $_.AllowNewSession -eq $true }
+    $sessionHosts = Get-AzWvdSessionHost -ResourceGroupName $hostPoolRg -HostPoolName $hostPoolName | Where-Object { $_.AllowNewSession -eq $true -or $_.Name -notin $VMs }
     # Get current active user sessions
     $currentSessions = 0
     foreach ($sessionHost in $sessionHosts) {
@@ -227,7 +225,7 @@ catch {
 
 # Number of running and available session hosts
 # Host shut down are excluded
-$runningSessionHosts = $sessionHosts | Where-Object { $_.Status -eq "Available" -and $_.Name -notin $VMs }
+$runningSessionHosts = $sessionHosts | Where-Object { $_.Status -eq "Available" }
 $runningSessionHostsCount = $runningSessionHosts.count
 Write-Verbose "Running Session Host $runningSessionHostsCount"
 Write-Verbose ($runningSessionHosts | Out-string)
