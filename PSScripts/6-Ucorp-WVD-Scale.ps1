@@ -118,7 +118,7 @@ function Stop-SessionHost {
         $hostsToStop
     )
     # Get computers running with no users
-    $emptyHosts = $sessionHosts | Where-Object { $_.Session -eq 0 -and $_.Status -eq 'Available' }
+    $emptyHosts = $sessionHosts | Where-Object { $_.Session -eq 0 -and $_.Status -eq 'Available' -and $_.Name -notin $VMs }
     $emptyHostsCount = $emptyHosts.count
     Write-Verbose "Evaluating servers to shut down"
 
