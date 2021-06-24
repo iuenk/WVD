@@ -68,6 +68,9 @@ $hostPoolName = 'Ucorp-WVD-Pool'
 $hostPoolRg = 'Ucorp-WVD-RG'
 $sessionHostVmRg= 'Ucorp-WVD-RG'
 
+$secureDomainName = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainname).SecretValue
+$domainName = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureDomainName)))
+
 ############## Functions ####################
 
 Function Start-SessionHost {
@@ -148,6 +151,18 @@ function Stop-SessionHost {
 
 ########## Script Execution ##########
 
+# Get all VMs created today
+$logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).Date
+$VMs = @()
+  foreach($log in $logs)
+  {
+    if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
+    {
+    Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
+    $VMs += $hostPool.Name + "/" + $($log.Id.split("/")[8]) +".$DomainName"
+  }
+}
+
 # Get Host Pool 
 try {
     $hostPool = Get-AzWvdHostPool -ResourceGroupName $hostPoolRg -Name $hostPoolName 
@@ -212,7 +227,7 @@ catch {
 
 # Number of running and available session hosts
 # Host shut down are excluded
-$runningSessionHosts = $sessionHosts | Where-Object { $_.Status -eq "Available" }
+$runningSessionHosts = $sessionHosts | Where-Object { $_.Status -eq "Available" -and $_.Name -notin $VMs }
 $runningSessionHostsCount = $runningSessionHosts.count
 Write-Verbose "Running Session Host $runningSessionHostsCount"
 Write-Verbose ($runningSessionHosts | Out-string)

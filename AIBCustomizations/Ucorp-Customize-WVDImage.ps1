@@ -112,7 +112,7 @@ Invoke-WebRequest -Uri 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/MS
 Import-PfxCertificate -FilePath "$path\MSIXAppAttach.pfx" -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' -Password (ConvertTo-SecureString -String 'Welkom01!' -AsPlainText -Force) -Exportable
 
 
-### MSIX app attach mounten ### (gaat nog niet goed)
+### MSIX app attach mounten ###
 # Add MSIX storage account credentials as system needed to mount packages at session hosts
 $PsExecUrl = 'https://ucorpwvdstd.blob.core.windows.net/wvdfilerepo/PsExec.zip?sp=r&st=2021-06-22T20:17:10Z&se=2023-06-23T04:17:10Z&spr=https&sv=2020-02-10&sr=b&sig=U1nmgyKXmBRXY6XjxT3%2BGbIkanrE1O30RERqv7EtsG4%3D'
 $PsExecfile = 'PsExec.zip'
