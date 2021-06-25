@@ -2,18 +2,6 @@
 param($Timer)
 
 <#
-.SYNOPSIS
-    Automated process of starting and stopping WVD session hosts based on user sessions.
-.DESCRIPTION
-    This script is intended to automatically start and stop session hosts in a Windows Virtual Desktop
-    host pool based on the number of users.  
-    The script determines the number of Session Hosts that should be running by adding the number of sessions 
-    in the pool to a threshold. The threshold is the number of sessions available between each script run
-    to accommodate new connections.  Those two numbers are added and divided by the maximum sessions per host.  
-    The maximum session is set in the depth-first load balancing settings.  
-    Session hosts are stopped or started based on the number of session hosts
-    that should be available compared to the number of hosts that are running.
-
     Requirements:
     WVD Host Pool must be set to Depth First
     An Azure Function App
@@ -23,50 +11,23 @@ param($Timer)
         az.compute 
         az.desktopvirtualization
     For best results set a GPO to log out disconnected and idle sessions
-    Full details can be found at:
-    https://www.ciraltos.com/auto-start-and-stop-session-hosts-in-windows-virtual-desktop-spring-update-arm-edition-with-an-azure-function/
 .NOTES
-    Script is offered as-is with no warranty, expressed or implied.
-    Test it before you trust it
-    Author      : Travis Roberts
-    Contributor : Kandice Hendricks, Jurjen Atsma
-    Website     : www.ciraltos.com & https://www.greenpages.com/
-    Version     : 1.0.0.1 Bug bux and add "Shutdown" as a status of Session Hosts available to start
-                  1.0.0.0 Initial Build for WVD ARM.  Adapted from previous start-stop script for WVD Fall 2019
-                  Updated for new az.desktopvirtulization PowerShell module and to run as a Function App
 #>
 
-
 ######## Variables ##########
-
-# View Verbose data
-# Set to "Continue" to see Verbose data
-# set to "SilentlyContinue" to hide Verbose data
 $VerbosePreference = "Continue"
+$serverStartThreshold = 2
 
-# Server start threshold
-# Number of available sessions to trigger a server start or shutdown
-$serverStartThreshold = 0
-
-# Peak time and Threshold settings
-# Set usePeak to "yes" to enable peak time
-# Set the Peak Threshold, Start and Stop Peak Time,
-# Set the time zone to use, use "Get-TimeZone -ListAvailable" to list ID's
 $usePeak = "yes"
-$peakServerStartThreshold = 1
+$peakServerStartThreshold = 4
 $startPeakTime = '08:00:00'
 $endPeakTime = '18:00:00'
 $timeZone = "W. Europe Standard Time"
 $peakDay = 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
 
-# Host Pool Name
-$hostPoolName = 'Ucorp-WVD-Pool'
-
-# Session Host Resource Group
-# Session Hosts and Host Pools can exist in different Resource Groups, but are commonly the same
-# Host Pool Resource Group and the resource group of the Session host VM's.
-$hostPoolRg = 'Ucorp-WVD-RG'
-$sessionHostVmRg= 'Ucorp-WVD-RG'
+$hostPoolName = 'GSV-DEFAULT-POOL'
+$hostPoolRg = 'GSV-WVD'
+$sessionHostVmRg= 'GSV-WVD'
 $domainName = 'intern.stichtsevecht.nl'
 
 ############## Functions ####################
@@ -149,18 +110,6 @@ function Stop-SessionHost {
 
 ########## Script Execution ##########
 
-# Get all VMs created today
-$logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).Date
-$VMs = @()
-  foreach($log in $logs)
-  {
-    if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
-    {
-    Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
-    $VMs += $hostPool.Name + "/" + $($log.Id.split("/")[8]) +".$DomainName"
-  }
-}
-
 # Get Host Pool 
 try {
     $hostPool = Get-AzWvdHostPool -ResourceGroupName $hostPoolRg -Name $hostPoolName 
@@ -205,9 +154,22 @@ Write-Verbose "MaxSession:"
 Write-Verbose $maxSession
 
 # Find the total number of session hosts
-# Exclude servers in drain mode and do not allow new connections
+# Exclude servers in drain mode/ created today and do not allow new connections
+$logs = Get-AzLog -ResourceProvider Microsoft.Compute -StartTime (Get-Date).Date
+$VMs = @()
+  foreach($log in $logs)
+  {
+    if(($log.OperationName.Value -eq 'Microsoft.Compute/virtualMachines/write') -and ($log.SubStatus.Value -eq 'Created'))
+    {
+    Write-Output "- Found VM creation at $($log.EventTimestamp) for VM $($log.Id.split("/")[8]) in Resource Group $($log.ResourceGroupName) found in Azure logs"
+    $VMs += $hostPool.Name + "/" + $($log.Id.split("/")[8]) +".$DomainName"
+  }
+}
+
+start-sleep 5
+
 try {
-    $sessionHosts = Get-AzWvdSessionHost -ResourceGroupName $hostPoolRg -HostPoolName $hostPoolName | Where-Object { $_.AllowNewSession -eq $true -or $_.Name -notin $VMs }
+    $sessionHosts = Get-AzWvdSessionHost -ResourceGroupName $hostPoolRg -HostPoolName $hostPoolName | Where-Object { $_.AllowNewSession -eq $true -and $_.Name -notin $VMs }
     # Get current active user sessions
     $currentSessions = 0
     foreach ($sessionHost in $sessionHosts) {
@@ -246,5 +208,3 @@ elseif ($runningSessionHostsCount -gt $sessionHostTarget) {
 else {
     Write-Verbose "Running session host count $runningSessionHostsCount matches session host target count $sessionHostTarget, doing nothing"
 }
-
-
