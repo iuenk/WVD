@@ -71,7 +71,7 @@ jobs:
               $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
             }
 
-            $vmCustomImageSourceId = "/subscriptions/${{secrets.AZURE_SUBSCRIPTIONID}}/resourceGroups/$CustomerPrefix-WVD-RG/providers/Microsoft.Compute/galleries/$Sig/images/$SigImageDefName";
+            $vmCustomImageSourceId = $($vmTemplate.customImageId);
 
             # Retrieve sensitive information from KeyVault
             $secureAdminPassword = (Get-AzKeyVaultSecret -VaultName $VaultName -Name domainadminpassword).SecretValue
