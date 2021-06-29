@@ -103,14 +103,14 @@ jobs:
               #
 
               # Install Azure Monitoring Windows Agent
-              #$extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "AzureMonitorWindowsAgent" -ErrorAction SilentlyContinue
-              #if (-not $extensions){
-              #  $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "AzureMonitorWindowsAgent" -Publisher "Microsoft.Azure.Monitor" -Type "AzureMonitorWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              #}
-              #Else
-              #{
-              #  Write-Output "Skipping VM - Extension AzureMonitorWindowsAgent already installed"
-              #}
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "AzureMonitorWindowsAgent" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "AzureMonitorWindowsAgent" -Publisher "Microsoft.Azure.Monitor" -Type "AzureMonitorWindowsAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension AzureMonitorWindowsAgent already installed"
+              }
 
               # Install Dependency Windows Agent
               #$extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "DependencyAgentWindows" -ErrorAction SilentlyContinue

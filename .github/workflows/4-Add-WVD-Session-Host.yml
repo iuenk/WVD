@@ -20,13 +20,10 @@ jobs:
         inlineScript: |
           # Read the environment variables in PowerShell
           $Tags = @{"Environment"="PRD"; "Maintenance"="Thursday"}
-          $CustomerPrefix = "Ucorp"
           $HostPoolName = "Ucorp-WVD-Pool" 
-          $Sig = "ucorpwvdsig"
-          $SigImageDefName = "Ucorp-WVD-Image"
           $vmSize = "Standard_D4s_v3"
           $VaultName = "Ucorp-WVD-KV"
-          $NumberOfInstances = 1
+          $NumberOfInstances = 2
           $ResourceGroup = "Ucorp-WVD-RG"
           $VNetName = "Ucorp-vNet"
           $SubnetName = "Ucorp-WVD-Subnet"
@@ -46,30 +43,59 @@ jobs:
           {
             $hostpoolRG = $hostPool.Id.Split("/")[4]
             $hostpoolName = $hostPool.Id.Split("/")[-1]
+            
             # Retrieve the current Session Host information
             try
             {
-              $sessionHost = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG) | Select-Object -Last 1
-              if($sessionHost -eq $null){
-              $sessionHost = "$CustomerPrefix-WVD-0"
-              }
+              $sessionHost = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $($hostpoolRG)
             }
             catch
             {
               Write-Error ("A [" + $_.Exception.GetType().FullName + "] ERROR occurred. " + $_.Exception.Message)
               Break
             }
-
+                
             # Determine new Session Host number
             $vmTemplate = ($hostPool.VMTemplate | ConvertFrom-Json)
             if($SessionHost -eq $null){
               $vmInitialNumber = -1 + $NumberOfInstances
+
+              $NewComputerName = "{0}{1}" -f "$($vmTemplate.namePrefix)-",$vmInitialNumber
+              Write-Output "$NewComputerName"
             }
             Else {
-              $sessionHostNumber = $($SessionHost.Name.Split("/")[1].Split(".")[0] -replace "$($vmTemplate.namePrefix)-")
-              $lastSessionHostNumber = [int]($sessionHostNumber)
-              $vmInitialNumber = $lastSessionHostNumber + $NumberOfInstances
-            }
+              # get next available number in a range of numbers
+              $VMNames = Get-AzVM -Name "$($vmTemplate.namePrefix)*" -verbose:$false | select Name
+              $VMNames | select Name | Foreach-Object {Write-Verbose $_.Name} | Sort-Object
+              $VMNumbers = $VMNames | select Name | Foreach-Object {[int]($_.Name -replace '\D').Trim() } | Sort-Object
+              Write-Output "$($VMNumbers.Count) Matching entries found"
+
+              # Merge arrays adding a zero so we allways start issuing numbers from the beginning
+              $list = @(0) + $VMNumbers
+
+              # Remove Duplicates numbers from the array and sort into numerical order
+              $list = $list | Sort-Object -Unique
+
+              # Determine if next server name is a gap in the sequence in the array
+              for($i=0; $i -lt $list.length; $i++) {
+                  if( $list[$i+1]-$list[$i] -gt 1) {
+                      $vmInitialNumber = "{0:0}" -f ($list[$i]+1)
+                      $vmInitialNumber = [int]($vmInitialNumber)
+                      break
+                  }
+              }
+
+              # If no gap found in the sequence then use the next number from the sequence in the array
+              if ($vmInitialNumber -eq $null) {
+                $vmInitialNumber = "{0:0}" -f (($list[-1]+1))
+                $vmInitialNumber = [int]($vmInitialNumber)
+              }
+
+              # Construct new name
+              $NewComputerName = "{0}{1}" -f "$($vmTemplate.namePrefix)-",$vmInitialNumber
+
+              Write-Output "$NewComputerName"
+              }
 
             $vmCustomImageSourceId = $($vmTemplate.customImageId);
 
@@ -157,17 +183,6 @@ jobs:
             ## Add SessionHosts to existing WVD Hostpool, based on ARM Template
             New-AzResourceGroupDeployment -ResourceGroupName $hostpoolRG -TemplateFile $jsonARMTemplateFile -TemplateParameterObject $objTemplateParameter -administratorAccountPassword $secureAdminPassword -Verbose
           
-            # Place new Session Hosts in maintenance
-            $newSessionHosts = Get-AzWvdSessionHost -HostPoolName $($hostpool.Name) -ResourceGroupName $hostpoolRG | Select-Object -Last $NumberOfInstances
-            Foreach($newSessionHost in $newSessionHosts){
-              $InputString = $newSessionhost.Name
-              $WVDArray = $InputString.Split("/")
-              $WVDArray[0]
-              $WVDArray[1]
-
-                Write-host Disabling new sessions for session host: $WVDArray[1]
-                Update-AzWvdSessionHost -ResourceGroupName $hostpoolRG -HostPoolName $HostPoolName -Name $WVDArray[1] -AllowNewSession:$false
-            }
           }
 
         azPSVersion: 'latest'
