@@ -23,7 +23,7 @@ jobs:
           $HostPoolName = "Ucorp-WVD-Pool" 
           $vmSize = "Standard_D4s_v3"
           $VaultName = "Ucorp-WVD-KV"
-          $NumberOfInstances = 2
+          $NumberOfInstances = 1
           $ResourceGroup = "Ucorp-WVD-RG"
           $VNetName = "Ucorp-vNet"
           $SubnetName = "Ucorp-WVD-Subnet"
