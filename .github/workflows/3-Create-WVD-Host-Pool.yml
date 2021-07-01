@@ -28,6 +28,7 @@ jobs:
           $VMDiskType = "StandardSSD_LRS" # Premium_LRS
           $VaultName = "Ucorp-WVD-KV"
           $HostPoolName = "Ucorp-WVD-Pool"
+          $workSpaceName = "Ucorp-WVD-Workspace"
           $NumberOfInstances = 0
           $SecurityGroup = "SG_WVD_Users"
           $Cores = "4"
@@ -62,7 +63,7 @@ jobs:
             "location" = "westeurope";
             "validationEnvironment" = $false;
             "addToWorkspace" = $true;
-            "workSpaceName" = "$($CustomerPrefix)-wvd-Workspace";
+            "workSpaceName" = $workSpaceName;
             "workspaceLocation" = "westeurope";
             "workspaceResourceGroup" = $ResourceGroup;
             "allApplicationGroupReferences" = "";
@@ -122,11 +123,11 @@ jobs:
           $ResourceIDRemoteAppGroup = Get-AzResource -ResourceGroupName $ResourceGroup | Where-Object {$_.Name -eq "$HostPoolName-RAG"} | Select-Object -ExpandProperty ResourceID
 
           $ApplicationGroupReference = "$ResourceIDDesktopGroup","$ResourceIDRemoteAppGroup"
-          Update-AzWvdWorkspace -ResourceGroupName $ResourceGroup -Name "$CustomerPrefix-wvd-Workspace" -ApplicationGroupReference $ApplicationGroupReference
+          Update-AzWvdWorkspace -ResourceGroupName $ResourceGroup -Name $workSpaceName -ApplicationGroupReference $ApplicationGroupReference
 
           #Add AD group to new created Groups
-          $SecurityGroupId = (Get-AzADGroup -DisplayName $SecurityGroup).Id
-          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-DAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
-          New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-RAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
+          #$SecurityGroupId = (Get-AzADGroup -DisplayName $SecurityGroup).Id
+          #New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-DAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
+          #New-AzRoleAssignment -ObjectId $SecurityGroupId -RoleDefinitionName "Desktop Virtualization User" -ResourceName "$HostPoolName-RAG" -ResourceGroupName $ResourceGroup -ResourceType 'Microsoft.DesktopVirtualization/applicationGroups'
 
         azPSVersion: 'latest'
