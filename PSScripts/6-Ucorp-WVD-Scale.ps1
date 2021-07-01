@@ -38,10 +38,10 @@ $endPeakTime = '18:00:00'
 $timeZone = "W. Europe Standard Time"
 $peakDay = 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
 
-$hostPoolName = 'GSV-DEFAULT-POOL'
-$hostPoolRg = 'GSV-WVD'
-$sessionHostVmRg= 'GSV-WVD'
-$domainName = 'intern.stichtsevecht.nl'
+$hostPoolName = 'Ucorp-WVD-Pool'
+$hostPoolRg = 'Ucorp-WVD-RG'
+$sessionHostVmRg= 'Ucorp-WVD-RG'
+$domainName = 'ucorp.local'
 
 $PatchDay = "Thursday"
 $PatchHours = @(20,21,22)
