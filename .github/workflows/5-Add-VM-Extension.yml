@@ -93,14 +93,14 @@ jobs:
               write-host $VM "under" $hostpoolRG "is" $provisioningState
 
               # Install Microsoft Monitoring Agent
-              #$extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "MicrosoftMonitoringAgent" -ErrorAction SilentlyContinue
-              #if (-not $extensions){
-              #  $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "MicrosoftMonitoringAgent" -Publisher "Microsoft.EnterpriseCloud.Monitoring" -Type "MicrosoftMonitoringAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings          
-              #}
-              #Else
-              #
-              #  Write-Output "Skipping VM - Extension MicrosoftMonitoringAgent already installed"
-              #
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "MicrosoftMonitoringAgent" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "MicrosoftMonitoringAgent" -Publisher "Microsoft.EnterpriseCloud.Monitoring" -Type "MicrosoftMonitoringAgent" -TypeHandlerVersion "1.0" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings          
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension MicrosoftMonitoringAgent already installed"
+              }
 
               # Install Azure Monitoring Windows Agent
               $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "AzureMonitorWindowsAgent" -ErrorAction SilentlyContinue
@@ -113,14 +113,14 @@ jobs:
               }
 
               # Install Dependency Windows Agent
-              #$extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "DependencyAgentWindows" -ErrorAction SilentlyContinue
-              #if (-not $extensions){
-              #  $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
-              #}
-              #Else
-              #{
-              #  Write-Output "Skipping VM - Extension DependencyAgentWindows already installed"
-              #}
+              $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "DependencyAgentWindows" -ErrorAction SilentlyContinue
+              if (-not $extensions){
+                $result = Set-AzVMExtension -ResourceGroupName $hostpoolRG -Location $Location -VMName $VM -Name "DependencyAgentWindows" -Publisher "Microsoft.Azure.Monitoring.DependencyAgent" -Type "DependencyAgentWindows" -TypeHandlerVersion "9.10" -Settings $PublicSettings -ProtectedSettings $ProtectedSettings
+              }
+              Else
+              {
+                Write-Output "Skipping VM - Extension DependencyAgentWindows already installed"
+              }
 
               # Install Optimalization Pack
               $extensions = Get-AzVMExtension -ResourceGroupName $hostpoolRG -VMName $VM -Name "OptimalizationPack" -ErrorAction SilentlyContinue
