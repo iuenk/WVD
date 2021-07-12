@@ -150,7 +150,7 @@ jobs:
               "domain"="$($domainName)";
               "ouPath"="$($ouPath)";
               "aadJoin" = $false;
-              "intune" = $false;
+              "intune" = $true;
             }
             
             # Add additional parameters, based on image type
